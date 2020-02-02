@@ -1,0 +1,71 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Playlist Generator</title>
+   
+    @Styles.Render("~/Content/bootstrap4-toggle.min.css")
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+</head>
+<body>
+    @*<div class="navbar navbar-inverse navbar-fixed-top">
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    @Html.ActionLink("Application name", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
+                </div>
+                <div class="navbar-collapse collapse">
+                    <ul class="nav navbar-nav">
+                        <li>@Html.ActionLink("Home", "Index", "Home")</li>
+                        <li>@Html.ActionLink("About", "About", "Home")</li>
+                        <li>@Html.ActionLink("Contact", "Contact", "Home")</li>
+                    </ul>
+                </div>
+            </div>
+        </div>*@
+
+    <nav class="navbar navbar-dark justify-content-between" style="background-color: #353535;">
+        <div class="container">
+            <a class="navbar-brand">Playlist Generator</a>
+            <form class="form-inline">
+                <button class="btn btn-success" type="button">Connect with Spotify</button>
+            </form>
+        </div>
+    </nav>
+
+    <div class="container body-content">
+        @RenderBody()
+
+
+        <hr style="border-top: 1px solid white;" />
+        <footer style="color:white;">
+            <p>&copy; @DateTime.Now.Year - Playlist Generator</p>
+        </footer>
+
+    </div>
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/Scripts/bootstrap4-toggle.min.js")
+    @Scripts.Render("~/bundles/bootstrap")
+    @RenderSection("scripts", required: false)
+<script>
+    $(function () {
+        $('#toggle-two').bootstrapToggle({
+            on: 'Artist',
+            off: 'Song',
+            height: 10, 
+            offstyle: 'success',
+            onstyle: 'success',
+            style: '.slow .toggle-group { transition: left 0.7s; -webkit-transition: left 0.7s; }'
+
+        });
+    })
+</script>
+</body>
+</html>
