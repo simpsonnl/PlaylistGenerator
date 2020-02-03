@@ -26,8 +26,10 @@ namespace PlaylistGenerator.Controllers
                 TokenType = token.TokenType
             };
             FullTrack fulltrack = _spotify.GetTrack("4Bh5r6syfTaPkGZFRD2ZFj");
-            
+            List<SimpleArtist> artists = _spotify.GetTrack("4Bh5r6syfTaPkGZFRD2ZFj").Artists;
+
             track.Name = fulltrack.Name;
+            track.Artists = artists;
          
 
 
