@@ -22,3 +22,20 @@ select,
 textarea {
     max-width: 280px;
 }
+
+.form-control-underlined {
+    border-width: 0;
+    border-bottom-width: 1px;
+    border-radius: 0;
+    padding-left: 0;
+    width:250px;
+}
+
+form-control {
+    width:500px;
+
+}
+
+.form-control:focus {
+    box-shadow: none;
+}

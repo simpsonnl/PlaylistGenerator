@@ -5,21 +5,22 @@
 }
 
     <div class="jumbotron">
-        <h1>Generate</h1>
-        <h1>@Model.Name</h1>
-        <h2>By: @Model.Artists[0].Name</h2>
+
+        <h1>Generate Playlist</h1>
         <p class="lead">Search for a song or artist to create a playlist from.</p>
         <p>
             <input type="checkbox" id="toggle-two">
         </p>
         <!-- Search form -->
-        <form>
+        @using (Html.BeginForm("Search", "Home", FormMethod.Post))
+        {
             <div class="form-group mb-4">
-                <input id="exampleFormControlInput5" type="email" placeholder="What're you searching for?" class="form-control form-control-underlined border-success">
+                <input id="query" name="query" type="text" placeholder="What're you searching for?" class="form-control form-control-underlined border-success" width="250" st>
             </div>
-        </form>
-        <p class="lead">Select one your recent songs or artists.</p>
-    </div>
+        }
+
+            <p class="lead">Select one your recent songs or artists.</p>
+        </div>
 
 @*<div class="row">
         <div class="col-md-4">

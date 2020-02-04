@@ -1,0 +1,18 @@
+﻿@model SpotifyAPI.Web.Models.SearchItem
+
+@{
+    ViewBag.Title = "Search";
+}
+
+<h2>Search</h2>
+
+
+    @foreach (var track in Model.Tracks.Items)
+    {
+        {
+            <a  href="@Url.Action("Create","Playlist", new { id = track.Artists[0].Id })">
+                <p style="color:white;">@track.Name - @track.Artists[0].Name - @track.Id</p>
+                
+            </a>
+        }
+    }

@@ -6,13 +6,8 @@ using System.Web;
 
 namespace PlaylistGenerator.Models
 {
-    public class Track
+    public class Track : FullTrack
     {
-        public int Id { get; set; }
-        public string Name { get; set; }
-
-        public string TrackToken { get; set; }
-
-        public List<SimpleArtist> Artists { get; set; }
+        
     }
 }

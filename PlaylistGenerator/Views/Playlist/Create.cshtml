@@ -1,0 +1,11 @@
+﻿@model PlaylistGenerator.Models.Playlist
+
+@{
+    ViewBag.Title = "Create";
+}
+
+@foreach (var track in Model.TrackList)
+{
+    <p style="color:white;">@track.Name - @track.Artists[0].Name - @track.</p>
+}
+
