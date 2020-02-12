@@ -1,0 +1,170 @@
+﻿@model PlaylistGenerator.ViewModels.PlaylistViewModel
+
+@{
+    ViewBag.Title = "Create";
+}
+
+
+
+<h2 style="color:white;">@Model.title</h2>
+
+<div class="container" >
+    <div class="row" >
+
+        <div class="col col-lg-8" style="padding-left:0px;">
+
+            <table class="table table-dark">
+                <thead>
+                    <tr>
+                        <th scope="col">Title</th>
+                        <th scope="col">Artist</th>
+                        <th scope="col">Length</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var track in Model.Playlist.TrackList)
+                    {
+                        <tr>
+                            <td>@track.Name</td>
+                            <td>@track.Artists[0].Name</td>
+                            <td class="length">@track.DurationMs</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="col" style="padding-left:79px;">
+            <div class="row">
+                <img src="@Model.imageUrl" width="300" height="300"/>
+            </div>
+            <div class="row" style="padding-top:10px;">
+                <button class="btn btn-light" type="submit">Login to Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script type="text/javascript">
+        function millisToMinutesAndSeconds(millis) {
+            var minutes = Math.floor(millis / 60000);
+            var seconds = ((millis % 60000) / 1000).toFixed(0);
+            return minutes + ":" + (seconds < 10 ? '0' : '') + seconds;
+        }
+        var x = document.getElementsByClassName("length");
+        for (var i = 0; i < x.length; i++) {
+            var ms = x[i].innerHTML;
+            x[i].innerHTML = millisToMinutesAndSeconds(ms);
+        }
+    </script>
+}
+@*@section Scripts{
+        <script src="https://sdk.scdn.co/spotify-player.js"></script>
+        <script>
+            window.onSpotifyWebPlaybackSDKReady = () => {
+      const play = ({
+              spotify_uri,
+              playerInstance: {
+                _options: {
+                  getOAuthToken,
+                  id
+                }
+              }
+            }) => {
+              getOAuthToken(access_token => {
+                fetch(`https://api.spotify.com/v1/me/player/play?device_id=${id}`, {
+                  method: 'PUT',
+                  body: JSON.stringify({ uris: [spotify_uri] }),
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${access_token}`
+                  },
+                });
+              });
+            };
+
+            play({
+              playerInstance: new Spotify.Player({ name: "..." }),
+              spotify_uri: 'spotify:track:7xGfFoTpQ2E7fRF5lN10tr',
+            });
+    };
+
+            //window.onSpotifyWebPlaybackSDKReady = () => {
+            //    const token = 'BQDvm0zwis3Hiopm_XqOO_yjDxQi8W7rVLE0cDO1VG2WqE3eSBY0feFNs5pGN_DYMzQKL-t_IEP27C6aW2YFlwMnCoOMKGVWHzW0GxC-FSs2Lf-4GLz3LO0d-HZziQQXvY9fOeBVQTStjt_ebt5tdOPGwKtbRkBYIMA';
+            //    const player = new Spotify.Player({
+            //        name: 'Web Playback SDK Quick Start Player',
+            //        getOAuthToken: cb => { cb(token); }
+            //    });
+
+            //    // Error handling
+            //    player.addListener('initialization_error', ({ message }) => { console.error(message); });
+            //    player.addListener('authentication_error', ({ message }) => { console.error(message); });
+            //    player.addListener('account_error', ({ message }) => { console.error(message); });
+            //    player.addListener('playback_error', ({ message }) => { console.error(message); });
+
+            //    // Playback status updates
+            //    player.addListener('player_state_changed', state => { console.log(state); });
+
+            //    // Ready
+            //    player.addListener('ready', ({ device_id }) => {
+            //        console.log('Ready with Device ID', device_id);
+            //    });
+
+            //    // Not Ready
+            //    player.addListener('not_ready', ({ device_id }) => {
+            //        console.log('Device ID has gone offline', device_id);
+            //    });
+
+            //    // Connect to the player!
+            //    player.connect.then(success => {
+            //        if (success) {
+            //            console.log('The Web Playback SDK successfully connected to Spotify!');
+            //        }
+            //    });
+            //};
+        </script>
+    }*@
+
+@*<html>
+    <head>
+        <title>Spotify Web Playback SDK Quick Start Tutorial</title>
+    </head>
+    <body>
+        <h1>Spotify Web Playback SDK Quick Start Tutorial</h1>
+        <h2>Open your console log: <code>View > Developer > JavaScript Console</code></h2>
+
+        <script src="https://sdk.scdn.co/spotify-player.js"></script>
+        <script>
+            window.onSpotifyWebPlaybackSDKReady = () => {
+                const token = 'BQDBlDX3UFdW_QDe3ipjeIj89rzYDbiFE0YwREppryhCTcye8NIo759JDLKtguJXwklPRmxjbSOGWm0ISFWlxDcUkpcGOncaXzV_DPj3R4ozDNbtquaSOHB1zP4k07W6-FGAe2HOH-x5xTyJ9teAcRYrYzG6gTwUvWs';
+                const player = new Spotify.Player({
+                    name: 'Web Playback SDK Quick Start Player',
+                    c
+                    getOAuthToken: cb => { cb(token); }
+                });
+
+                // Error handling
+                player.addListener('initialization_error', ({ message }) => { console.error(message); });
+                player.addListener('authentication_error', ({ message }) => { console.error(message); });
+                player.addListener('account_error', ({ message }) => { console.error(message); });
+                player.addListener('playback_error', ({ message }) => { console.error(message); });
+
+                // Playback status updates
+                player.addListener('player_state_changed', state => { console.log(state); });
+
+                // Ready
+                player.addListener('ready', ({ device_id }) => {
+                    console.log('Ready with Device ID', device_id);
+                });
+
+                // Not Ready
+                player.addListener('not_ready', ({ device_id }) => {
+                    console.log('Device ID has gone offline', device_id);
+                });
+
+                // Connect to the player!
+                player.connect();
+            };
+        </script>
+    </body>
+    </html>*@

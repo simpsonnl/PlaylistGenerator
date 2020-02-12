@@ -13,5 +13,16 @@ namespace PlaylistGenerator.Models
             TrackList = new List<FullTrack>();
         }
         public List<FullTrack> TrackList { get; set; }
+
+        
+        public bool hasTrack(string id)
+        {
+            foreach (var t in TrackList)
+            {
+                if (id.Equals(t.Id)) return true;
+            }
+            return false;
+        }
+
     }
 }

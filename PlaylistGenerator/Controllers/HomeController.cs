@@ -1,4 +1,5 @@
 ﻿using PlaylistGenerator.Models;
+using PlaylistGenerator.ViewModels;
 using SpotifyAPI.Web;
 using SpotifyAPI.Web.Auth;
 using SpotifyAPI.Web.Enums;
@@ -17,46 +18,60 @@ namespace PlaylistGenerator.Controllers
         private static SpotifyWebAPI _spotify;
         private static FullTrack track = new FullTrack();
         private CredentialsAuth auth = new CredentialsAuth("52c0f5ab6e5f4a2f83da6c5fad1c6bac", "6e2bea1292b845b392725811ae29b026");
-        private SearchItem searchItem = new SearchItem();
+        private List<Search> searchList = new List<Search>();
 
         public HomeController()
         {
             
         }
 
-        public async Task<ActionResult> Index()
+        public ActionResult Index(IndexViewModel viewModel)
         {
-            searchItem.Tracks = new Paging<FullTrack>();
-            searchItem.Tracks.Items = new List<FullTrack>();
-
+            return View(viewModel);
+        }
+        [HttpPost]
+        public async Task<JsonResult> SearchTerm(string query)
+        {
             Token token = await auth.GetToken();
             _spotify = new SpotifyWebAPI()
             {
                 AccessToken = token.AccessToken,
                 TokenType = token.TokenType
             };
-            FullTrack fulltrack = _spotify.GetTrack("4Bh5r6syfTaPkGZFRD2ZFj");
-            List<SimpleArtist> artists = _spotify.GetTrack("4Bh5r6syfTaPkGZFRD2ZFj").Artists;
 
-            track = fulltrack;
-         
+            
 
+            var searchItems = _spotify.SearchItems(query, SearchType.Track, 5, 0, "US").Tracks.Items;
 
-            return View();
-        }
-        
-        public ActionResult Search()
-        {
-            searchItem.Tracks = new Paging<FullTrack>();
-            searchItem.Tracks.Items = new List<FullTrack>();
-            return View();
+            searchList.Clear();
+            
+            foreach (var item in searchItems)
+            {
+                var displayArtist = "";
+
+                foreach (var artist in item.Artists)
+                {
+                    displayArtist += artist.Name + ", ";
+                }
+
+                var displayArtistTrimmed = displayArtist.Remove(displayArtist.Length - 2, 2);
+
+                searchList.Add(new Search() {
+                    Name = item.Name + " - " + displayArtistTrimmed,
+                    Id = item.Id
+                }) ;
+            }
+
+            var searchItemsJson = Json(searchList, JsonRequestBehavior.AllowGet);
+
+            
+
+            return searchItemsJson ;
         }
 
         [HttpPost]
-        public async Task<ActionResult> Search(string query)
+        public async Task<JsonResult> SearchArtistTerm(string query)
         {
-            searchItem.Tracks = new Paging<FullTrack>();
-            searchItem.Tracks.Items = new List<FullTrack>();
             Token token = await auth.GetToken();
             _spotify = new SpotifyWebAPI()
             {
@@ -64,12 +79,29 @@ namespace PlaylistGenerator.Controllers
                 TokenType = token.TokenType
             };
 
+            var j = Json(_spotify.SearchItems(query, SearchType.Artist, 5, 0, "US").Artists.Items, JsonRequestBehavior.AllowGet);
 
-            searchItem = _spotify.SearchItems(query, SearchType.Track, 20, 0, "US");
+            return j;
+        }
+
+        //[HttpPost]
+        //public async Task<ActionResult> Search(string query)
+        //{
+        //    searchItem.Tracks = new Paging<FullTrack>();
+        //    searchItem.Tracks.Items = new List<FullTrack>();
+        //    Token token = await auth.GetToken();
+        //    _spotify = new SpotifyWebAPI()
+        //    {
+        //        AccessToken = token.AccessToken,
+        //        TokenType = token.TokenType
+        //    };
+
+
+        //    searchItem = _spotify.SearchItems(query, SearchType.Track, 5, 0, "US");
             
 
-            return View(searchItem);
-        }
+        //    return View(searchItem);
+        //}
 
         public ActionResult Playlist()
         {

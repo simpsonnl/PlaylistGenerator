@@ -4,10 +4,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Playlist Generator</title>
-   
+
     @Styles.Render("~/Content/bootstrap4-toggle.min.css")
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
+    @Styles.Render("~/Content/themes/base/jquery-ui.css")
+
+    
 </head>
 <body>
     @*<div class="navbar navbar-inverse navbar-fixed-top">
@@ -30,12 +33,13 @@
             </div>
         </div>*@
 
-    <nav class="navbar navbar-dark justify-content-between" style="background-color: #353535;">
+    <nav class="navbar navbar-dark justify-content-between" style="background-color: #343a40;">
         <div class="container">
             <a class="navbar-brand" href="@Url.Action("Index", "Home")"><h1>Playlist Generator</h1></a>
-            <form class="form-inline">
-                <button class="btn btn-success" type="button">Connect with Spotify</button>
-            </form>
+            @using (Html.BeginForm("Auth", "Authorize", FormMethod.Post))
+            { 
+                <button class="btn btn-light" type="submit">Connect with Spotify</button>
+            }
         </div>
     </nav>
 
@@ -53,19 +57,24 @@
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/Scripts/bootstrap4-toggle.min.js")
     @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/Scripts/jquery-ui-1.12.1.min.js")
     @RenderSection("scripts", required: false)
-<script>
-    $(function () {
-        $('#toggle-two').bootstrapToggle({
-            on: 'Artist',
-            off: 'Song',
-            height: 10, 
-            offstyle: 'success',
-            onstyle: 'success',
-            style: '.slow .toggle-group { transition: left 0.7s; -webkit-transition: left 0.7s; }'
+    <script>
+        $(function () {
+            $('#toggle-two').bootstrapToggle({
+                on: 'Artist',
+                off: 'Song',
+                height: 10,
+                offstyle: 'primary',
+                onstyle: 'primary',
+                style: '.slow .toggle-group { transition: left 0.7s; -webkit-transition: left 0.7s; }'
 
+            });
         });
-    })
-</script>
+
+        
+    
+
+    </script>
 </body>
 </html>

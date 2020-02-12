@@ -1,5 +1,5 @@
 ﻿body {
-    background:#353535 !important;
+    background:#343a40 !important;
     padding-bottom: 20px;
 }
 
@@ -39,3 +39,5 @@ form-control {
 .form-control:focus {
     box-shadow: none;
 }
+
+
