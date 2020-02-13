@@ -4,27 +4,29 @@
     ViewBag.Title = "Create";
 }
 
+<hr style="border-top: 1px solid white;"/>
 
+<h2 style="color: white;">@Model.title</h2>
 
-<h2 style="color:white;">@Model.title</h2>
-
-<div class="container" >
+<div class="container justify-content-between" >
     <div class="row" >
 
-        <div class="col col-lg-8" style="padding-left:0px;">
+        <div class="col col-lg-9" style="padding-left:0px;">
 
-            <table class="table table-dark">
+            <table class="table table-hover table-dark">
                 <thead>
                     <tr>
+                        <th scope="col" width="7%"></th>
                         <th scope="col">Title</th>
-                        <th scope="col">Artist</th>
-                        <th scope="col">Length</th>
+                        <th scope="col" width="25%">Artist</th>
+                        <th scope="col" width="10%">Length</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var track in Model.Playlist.TrackList)
                     {
                         <tr>
+                            <td><img src="@track.Album.Images[2].Url" width="30" height="30"/></td>
                             <td>@track.Name</td>
                             <td>@track.Artists[0].Name</td>
                             <td class="length">@track.DurationMs</td>
@@ -33,12 +35,12 @@
                 </tbody>
             </table>
         </div>
-        <div class="col" style="padding-left:79px;">
+        <div class="col-sm-3" >
             <div class="row">
-                <img src="@Model.imageUrl" width="300" height="300"/>
+                <img src="@Model.imageUrl" width="277" height="277" />
             </div>
-            <div class="row" style="padding-top:10px;">
-                <button class="btn btn-light" type="submit">Login to Save</button>
+            <div class="row sticky-top" style="padding-top:20px;">
+                <button class="btn btn-light" type="submit" style="width:277px !important;">Login to Save</button>
             </div>
         </div>
     </div>

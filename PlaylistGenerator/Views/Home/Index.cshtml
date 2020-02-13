@@ -7,55 +7,72 @@
 
 
 
-<div class="jumbotron">
+    <div class="jumbotron">
 
-    <h1>Generate Playlist</h1>
-    <p class="lead">Search for a song or artist to create a playlist from.</p>
-    <p>
-        <input type="checkbox" id="toggle-two">
-    </p>
-    <!-- Search form -->
-    @using (Html.BeginForm("CreatePlaylist", "Playlist", FormMethod.Post, new { id="createForm"}))
-    {
-<div class="form-group mb-4">
-    <input type="hidden" id="inputId" name="inputId" value="" />
-    <input type="hidden" id="isTrack" name="isTrack" value=true />
-    @*@Html.EditorFor(Model => Model.searchTrack.Name, new { htmlAttributes = new { @class = "form-control", @placeholder = "Search for a song..."} })*@
+        <h1>Generate Playlist</h1>
+        <p class="lead">Search for a song or artist to create a playlist from.</p>
+        <p>
+            <input type="checkbox" id="toggle-two">
+        </p>
+        <!-- Search form -->
+        @using (Html.BeginForm("CreatePlaylist", "Playlist", FormMethod.Post, new { id = "createForm" }))
+        {
+    <div class="conainer">
+        <div class="row">
+            <div class="col">
+                <div class="form-group mb-4">
+                    <input type="hidden" id="inputId" name="inputId" value="" />
+                    <input type="hidden" id="isTrack" name="isTrack" value=true />
 
-    <input id="searchTrack_Name" type="search" class="form-control" placeholder="Search for a song..." name="query" spellcheck="false" />
+                    <input id="searchTrack_Name" type="search" class="form-control" placeholder="Search for a song..." name="query" spellcheck="false" style="width:400px;" />
 
-    <p style="padding-top:10px;" class="budget">Playlist artists slider</p>
-    <div >
-        <input type="range" name="range" id="range" min="1" max="5" step="1" value="3" class="custom-range" />
 
-        <label for="range" id="rangeLabel">3</label>
+                    <div style="padding-top:10px;">
+                        <button disabled id="submit" type="submit" class="ui-button-text">Generate Playlist</button>
+                    </div>
+
+                </div>
+            </div>
+            <div class="col">
+                <button class="ui-button-text" id="showhidetrigger" type="button">Advanced Settings</button>
+                <div id="showhidetarget">
+                    <p style="padding-top:10px;" class="budget">Select how many different artists you would like in the playlist</p>
+                    <div>
+                        <input type="range" name="range" id="range" min="1" max="5" step="1" value="3" class="custom-range" style="width:300px;" />
+
+                        <label for="range" id="rangeLabel">A good amount of artists</label>
+                    </div>
+
+
+                    <select id="numberOfTracks" name="numberOfTracks" class="custom-select" style="width:133px;">
+                        @*<option disabled="disabled" selected="selected" value="">Select a playlist size...</option>*@
+                        <option value="15">15 Songs</option>
+                        <option id="30Option" value="30" selected="selected">30 Songs</option>
+                        <option id="50Option" value="50">50 Songs</option>
+                        <option id="100Option" value="100">100 Songs</option>
+                    </select>
+                </div>
+            </div>
+        </div>
     </div>
-    @*<input type="number" id="numberOfTracks" name="numberOfTracks" value="30" max="100" min="1"/>*@
-    
-    <div>
-        <label for="numberOfTracks" id="numberOfTracksLabel">Select the amount of songs you would like to have in your playlist.</label>
-    </div>
-    
-    <select id="numberOfTracks" name="numberOfTracks" class="custom-select" style="width:133px;">
-        @*<option disabled="disabled" selected="selected" value="">Select a playlist size...</option>*@
-        <option value="15">15 Songs</option>
-        <option id="30Option" value="30" selected="selected">30 Songs</option>
-        <option id="50Option" value="50">50 Songs</option>
-        <option id="100Option" value="100">100 Songs</option>
-    </select>
-    <div style="padding-top:10px;">
-        <button disabled id="submit" type="submit" class="ui-button-text">Generate Playlist</button>
-    </div>
+        }
 
-</div>
-    }
-
-    <p class="lead">Select one your recent songs or artists.</p>
-</div>
+        <p class="lead">Select one your recent songs or artists.</p>
+    </div>
 
 @section Scripts{
 
     <script type="text/javascript">
+
+        $(document).ready(function () {
+            $('#showhidetarget').hide();
+
+            $('#showhidetrigger').click(function () {
+                $('#showhidetarget').toggle(400);
+            });
+        });
+
+
         var url = "/Home/SearchTerm";
         var boxId = "#searchTrack_Name";
         var count = 1;
@@ -145,20 +162,28 @@
             var NumberOfTracksVal = $('#numberOfTracks').val();
             $('#rangeLabel').html($(this).val());
             if ($(this).val() == 1) {
+                $('#rangeLabel').html("A couple artists");
                 $('#100Option').attr('disabled', true);
                 $('#50Option').attr('disabled', true);
                 if (NumberOfTracksVal != 30) {
                     ($('#numberOfTracks').val(30));
                 }
             } else if ($(this).val() == 2) {
+                $('#rangeLabel').html("A few artists");
                 $('#100Option').attr('disabled', true);
                 $('#50Option').attr('disabled', false);
                 if (NumberOfTracksVal == 100) {
                     ($('#numberOfTracks').val(50));
                 }
-                    
-               
+
+
+            } else if ($(this).val() == 3) {
+                $('#rangeLabel').html("A good amount of artists");
+
+            }else if($(this).val() == 4){
+                $('#rangeLabel').html("Now were talking");
             } else {
+                $('#rangeLabel').html("Gimme all the artists");
                 $('#100Option').attr('disabled', false);
                 $('#50Option').attr('disabled', false);
             }
