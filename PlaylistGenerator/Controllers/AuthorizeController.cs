@@ -31,7 +31,7 @@ namespace PlaylistGenerator.Controllers
             SpotifyWebAPI spotify;
 
             // You should store a reference to WebAPIFactory if you are using AutoRefresh or want to manually refresh it later on. New WebAPIFactory objects cannot refresh SpotifyWebAPI object that they did not give to you.
-            webApiFactory = new TokenSwapWebAPIFactory("https://tokenswapauthentication.000webhostapp.com/get_token")
+            webApiFactory = new TokenSwapWebAPIFactory("https://frozen-chamber-35968.herokuapp.com/swap")
             {
                 Scope = Scope.UserReadPrivate | Scope.UserReadEmail | Scope.PlaylistReadPrivate,
                 AutoRefresh = true
