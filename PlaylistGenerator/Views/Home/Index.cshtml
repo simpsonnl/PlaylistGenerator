@@ -58,6 +58,10 @@
         }
 
         <p class="lead">Select one your recent songs or artists.</p>
+        @foreach (var track in Model.recentTracks)
+        {
+            <img src="@track.Album.Images[0]" height="400" width="300"/>
+        }
     </div>
 
 @section Scripts{
@@ -73,7 +77,7 @@
         });
 
 
-        var url = "/Home/SearchTerm";
+        var url = "/Home/SearchTrack";
         var boxId = "#searchTrack_Name";
         var count = 1;
         var boxVal = "";
@@ -153,7 +157,7 @@
                 $("#searchArtist_Name").attr('placeholder', 'Search for a song...');
                 $("#searchArtist_Name").attr('id', 'searchTrack_Name');
                 $("#isTrack").val(true);
-                url = "/Home/SearchTerm";
+                url = "/Home/SearchTrack";
                 boxId = "#searchTrack_Name";
             }
         });

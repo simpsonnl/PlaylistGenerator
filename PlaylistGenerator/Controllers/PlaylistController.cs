@@ -15,10 +15,10 @@ namespace PlaylistGenerator.Controllers
     public class PlaylistController : Controller
     {
         private static SpotifyWebAPI _spotify;
-        private CredentialsAuth auth = new CredentialsAuth("52c0f5ab6e5f4a2f83da6c5fad1c6bac", "6e2bea1292b845b392725811ae29b026");
+        private CredentialsAuth auth = new CredentialsAuth("52c0f5ab6e5f4a2f83da6c5fad1c6bac", "a66d0d708a1f49789372f50a65d2b3cc");
         public async Task<ActionResult> CreatePlaylist(string inputId, bool isTrack, int range, int numberOfTracks)
         {
-            PlaylistViewModel viewModel = new PlaylistViewModel();
+            IndexViewModel viewModel = new IndexViewModel();
             
             viewModel.isTrack = isTrack;
 

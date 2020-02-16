@@ -17,7 +17,7 @@ namespace PlaylistGenerator.Controllers
     {
         private static SpotifyWebAPI _spotify;
         private static FullTrack track = new FullTrack();
-        private CredentialsAuth auth = new CredentialsAuth("52c0f5ab6e5f4a2f83da6c5fad1c6bac", "6e2bea1292b845b392725811ae29b026");
+        private CredentialsAuth auth = new CredentialsAuth("52c0f5ab6e5f4a2f83da6c5fad1c6bac", "a66d0d708a1f49789372f50a65d2b3cc");
         private List<Search> searchList = new List<Search>();
 
         public HomeController()
@@ -25,12 +25,17 @@ namespace PlaylistGenerator.Controllers
             
         }
 
-        public ActionResult Index(IndexViewModel viewModel)
+        public  ActionResult Index(IndexViewModel viewModel)
         {
+            viewModel.profile = (PrivateProfile) TempData["User"];
+            viewModel.api = (SpotifyWebAPI)TempData["api"];
+           
+            
+            
             return View(viewModel);
         }
         [HttpPost]
-        public async Task<JsonResult> SearchTerm(string query)
+        public async Task<JsonResult> SearchTrack(string query)
         {
             Token token = await auth.GetToken();
             _spotify = new SpotifyWebAPI()
