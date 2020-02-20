@@ -157,8 +157,10 @@ namespace PlaylistGenerator.Controllers
             //    }
             //}
 
-            TempData["api"] = api;
+            TempData["Api"] = api;
             TempData["User"] = viewModel.profile;
+            TempData["Token"] = token;
+            TempData["Auth"] = auth;
             return RedirectToAction("Index", "Home");
             //return new JsonResult
             //{

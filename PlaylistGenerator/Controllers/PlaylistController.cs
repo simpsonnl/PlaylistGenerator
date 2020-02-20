@@ -16,10 +16,54 @@ namespace PlaylistGenerator.Controllers
     {
         private static SpotifyWebAPI _spotify;
         private CredentialsAuth auth = new CredentialsAuth("52c0f5ab6e5f4a2f83da6c5fad1c6bac", "a66d0d708a1f49789372f50a65d2b3cc");
+        
+        public async Task<ActionResult> Create() 
+        {
+            IndexViewModel viewModel = (IndexViewModel)TempData["ViewModel"];
+            Token userToken = (Token)TempData["Token"];
+            AuthorizationCodeAuth userAuth = (AuthorizationCodeAuth)TempData["Auth"];
+
+            if (viewModel.profile != null)
+            {
+                if (userToken.IsExpired())
+                {
+
+                    Token newToken = await userAuth.RefreshToken(userToken.RefreshToken);
+                    viewModel.api.AccessToken = newToken.AccessToken;
+                    viewModel.api.TokenType = newToken.TokenType;
+                }
+            }
+
+            TempData["Api"] = viewModel.api;
+            TempData["User"] = viewModel.profile;
+            TempData["Token"] = userToken;
+            TempData["Auth"] = userAuth;
+            TempData["ViewModel"] = viewModel;
+            TempData["Playlist"] = viewModel.Playlist;
+            TempData["isFromIndex"] = false;
+            return View(viewModel);
+        }
         public async Task<ActionResult> CreatePlaylist(string inputId, bool isTrack, int range, int numberOfTracks)
         {
+
             IndexViewModel viewModel = new IndexViewModel();
-            
+
+            viewModel.profile = (PrivateProfile)TempData["User"];
+            viewModel.api = (SpotifyWebAPI)TempData["Api"];
+            Token userToken = (Token)TempData["Token"];
+            AuthorizationCodeAuth userAuth = (AuthorizationCodeAuth)TempData["Auth"];
+
+            if(userToken != null)
+            {
+                if (userToken.IsExpired())
+                {
+
+                    Token newToken = await userAuth.RefreshToken(userToken.RefreshToken);
+                    viewModel.api.AccessToken = newToken.AccessToken;
+                    viewModel.api.TokenType = newToken.TokenType;
+                }
+            }
+
             viewModel.isTrack = isTrack;
 
             Token token = await auth.GetToken();
@@ -29,10 +73,6 @@ namespace PlaylistGenerator.Controllers
                 TokenType = token.TokenType
             };
 
-
-            
-
-            
             string artistId = inputId;
 
             if (isTrack)
@@ -60,7 +100,29 @@ namespace PlaylistGenerator.Controllers
 
             viewModel.Playlist = getPlaylist(relatedArtists, numberOfTracks, range);
 
-            return View(viewModel);
+          
+            TempData["Token"] = userToken;
+            TempData["Auth"] = userAuth;
+            TempData["ViewModel"] = viewModel;
+            return RedirectToAction("Create");
+        }
+        
+        public ActionResult CreateFromCard(string inputId, int range, int numberOfTracks, bool isTrack) 
+        {
+            IndexViewModel viewModel = new IndexViewModel();
+
+            viewModel.profile = (PrivateProfile)TempData["User"];
+            viewModel.api = (SpotifyWebAPI)TempData["Api"];
+            Token userToken = (Token)TempData["Token"];
+            AuthorizationCodeAuth userAuth = (AuthorizationCodeAuth)TempData["Auth"];
+
+            TempData["Api"] = viewModel.api;
+            TempData["User"] = viewModel.profile;
+            TempData["Token"] = userToken;
+            TempData["Auth"] = userAuth;
+            TempData["Playlist"] = viewModel.Playlist;
+
+            return RedirectToAction("CreatePlaylist", new { inputId, isTrack, range, numberOfTracks });
         }
 
         private string displayArtistsNames(FullTrack searchedTrack)
@@ -77,11 +139,7 @@ namespace PlaylistGenerator.Controllers
             return displayArtist;
         }
 
-        [HttpPost]
-        public ActionResult Create()
-        {
-            return View();
-        }
+        
 
         private SeveralArtists getRelatedArtists(string id, int scale)
         {
@@ -171,6 +229,49 @@ namespace PlaylistGenerator.Controllers
 
 
             return returnedPlaylist;
+        }
+
+        public async Task<ActionResult> Save(string playlistName, bool isPublic=false) {
+            string name = playlistName;
+            if (name == "")
+            {
+                name = ((IndexViewModel)TempData["ViewModel"]).title;
+            }
+
+            Token token = (Token)TempData["Token"];
+            AuthorizationCodeAuth auth = (AuthorizationCodeAuth)TempData["Auth"];
+            SpotifyWebAPI api = (SpotifyWebAPI)TempData["Api"];
+            Playlist currentPlaylist = (Playlist)TempData["Playlist"];
+
+            if (token.IsExpired())
+            {
+
+                Token newToken = await auth.RefreshToken(token.RefreshToken);
+                api.AccessToken = newToken.AccessToken;
+                api.TokenType = newToken.TokenType;
+            }
+
+            string userId = api.GetPrivateProfile().Id;
+
+            FullPlaylist playlist = api.CreatePlaylist(userId, name, isPublic);
+
+            if (!playlist.HasError())
+                Console.WriteLine("Playlist-URI: " + playlist.Uri);
+
+            ErrorResponse response = new ErrorResponse();
+
+            foreach (var track in currentPlaylist.TrackList)
+            {
+                response = api.AddPlaylistTrack(playlist.Id,track.Uri);
+            }
+
+            if (!response.HasError())
+            {
+
+            }
+            
+            
+            return RedirectToAction("Index", "Home");
         }
     }
 }

@@ -6,10 +6,14 @@
 
 <hr style="border-top: 1px solid white;"/>
 
-<h2 style="color: white;">@Model.title</h2>
+    
 
 <div class="container justify-content-between" >
-    <div class="row" >
+    <div class="row">
+        <h2 style="color:white;">@Model.title</h2>
+        <span style="color:white; padding:13px 0 0 10px;">(@Model.Playlist.TrackList.Count)</span>
+    </div>
+    <div class="row">
 
         <div class="col col-lg-9" style="padding-left:0px;">
 
@@ -26,7 +30,7 @@
                     @foreach (var track in Model.Playlist.TrackList)
                     {
                         <tr>
-                            <td><img src="@track.Album.Images[2].Url" width="30" height="30"/></td>
+                            <td><img src="@track.Album.Images[2].Url" width="30" height="30" /></td>
                             <td>@track.Name</td>
                             <td>@track.Artists[0].Name</td>
                             <td class="length">@track.DurationMs</td>
@@ -35,14 +39,29 @@
                 </tbody>
             </table>
         </div>
-        <div class="col-sm-3" >
-            <div class="row">
-                <img src="@Model.imageUrl" width="277" height="277" />
-            </div>
-            <div class="row sticky-top" style="padding-top:20px;">
-                <button class="btn btn-light" type="submit" style="width:277px !important;">Login to Save</button>
-            </div>
+        @using (Html.BeginForm("Save", "Playlist", FormMethod.Post))
+        {
+    <div class="col">
+        <div class="row">
+            <img src="@Model.imageUrl" width="277" height="277" />
         </div>
+        <div hidden class="row form-check form-check-inline" style="padding-top:20px;">
+            <input class="form-check-inline" type="checkbox" name="isPublic" id="isPublic" value="false" />
+            <label class="form-check-label" for="isPublic" style="color:white;">Public Playlist</label>
+        </div>
+        <div class="row" style="padding-top:20px;" @(Model.profile == null ? "hidden" : "")>
+            <input class="form-control" type="text" id="playlistName" name="playlistName" style="width:277px; height:38px;" placeholder="Rename Playlist...(optional)" />
+        </div>
+
+        <div class="row sticky-top" style="padding-top:20px;">
+            <button class="btn btn-light" type="
+                        @(Model.profile == null ? "button" : "submit")"
+                    style="width:277px !important;">
+                @(Model.profile == null ? "Login to Save" : "Save to Spotify")
+            </button>
+        </div>
+    </div>
+        }
     </div>
 </div>
 

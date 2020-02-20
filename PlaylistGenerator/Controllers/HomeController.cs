@@ -25,13 +25,53 @@ namespace PlaylistGenerator.Controllers
             
         }
 
-        public  ActionResult Index(IndexViewModel viewModel)
+        public async Task<ActionResult> Index(IndexViewModel viewModel)
         {
+            viewModel.isFromIndex = true;
             viewModel.profile = (PrivateProfile) TempData["User"];
-            viewModel.api = (SpotifyWebAPI)TempData["api"];
-           
-            
-            
+            viewModel.api = (SpotifyWebAPI)TempData["Api"];
+            Token token = (Token)TempData["Token"];
+            AuthorizationCodeAuth auth = (AuthorizationCodeAuth)TempData["Auth"];
+            if (token!=null) 
+            {
+                
+                
+
+                if (token.IsExpired())
+                {
+
+                    Token newToken = await auth.RefreshToken(token.RefreshToken);
+                    viewModel.api.AccessToken = newToken.AccessToken;
+                    viewModel.api.TokenType = newToken.TokenType;
+                }
+
+                CursorPaging<PlayHistory> histories = viewModel.api.GetUsersRecentlyPlayedTracks(20);
+                Paging<FullArtist> artists = viewModel.api.GetUsersTopArtists(TimeRangeType.ShortTerm, 20);
+
+                Random rand = new Random();
+                List<int> randNumbs = new List<int>();
+                do {
+                    int num = rand.Next(0, artists.Items.Count);
+                    if (!randNumbs.Contains(num))
+                    {
+                        randNumbs.Add(num);
+                    }
+                } while (randNumbs.Count < 5);
+
+                for (int i = 0; i < 5; i++)
+                {
+                    viewModel.topArtists.Add(artists.Items[randNumbs[i]]);
+                    
+                    string trackId = histories.Items[randNumbs[i]].Track.Id;
+                    viewModel.recentTracks.Add(viewModel.api.GetTrack(trackId));
+                }
+            }
+            TempData["User"] = viewModel.profile;
+            TempData["Api"] = viewModel.api;
+            TempData["Token"] = token;
+            TempData["Auth"] = auth;
+            TempData["isFromIndex"] = true;
+
             return View(viewModel);
         }
         [HttpPost]
@@ -89,37 +129,48 @@ namespace PlaylistGenerator.Controllers
             return j;
         }
 
-        //[HttpPost]
-        //public async Task<ActionResult> Search(string query)
-        //{
-        //    searchItem.Tracks = new Paging<FullTrack>();
-        //    searchItem.Tracks.Items = new List<FullTrack>();
-        //    Token token = await auth.GetToken();
-        //    _spotify = new SpotifyWebAPI()
-        //    {
-        //        AccessToken = token.AccessToken,
-        //        TokenType = token.TokenType
-        //    };
 
+        public ActionResult Logout()
+        {
+            bool isFromIndex = (bool)TempData["isFromIndex"];
+            if (isFromIndex)
+            {
+                return RedirectToAction("LogoutFromIndex");
+            }
+            else 
+            {
 
-        //    searchItem = _spotify.SearchItems(query, SearchType.Track, 5, 0, "US");
+                TempData["ViewModel"] = (IndexViewModel)TempData["ViewModel"];
+                TempData["Playlist"] = (Playlist)TempData["Playlist"];
+                return RedirectToAction("LogoutFromCreate"); 
+            }
+        }
+
+        public ActionResult LogoutFromIndex() 
+        {
+            TempData["User"] = null;
+            TempData["Api"] = null;
+            TempData["Token"] = null;
+            TempData["Auth"] = null;
             
-
-        //    return View(searchItem);
-        //}
-
-        public ActionResult Playlist()
-        {
-            return View();
-        }
-        [HttpPost]
-        public async Task<ActionResult> Playlist(Playlist playlist)
-        {
-
-
-            return View();
+            return RedirectToAction("Index");
         }
 
+        public ActionResult LogoutFromCreate()
+        {
+            IndexViewModel viewModel = (IndexViewModel)TempData["ViewModel"];
+            viewModel.profile = null;
+            viewModel.recentTracks = null;
+            viewModel.topArtists = null;
+
+            TempData["User"] = null;
+            TempData["Api"] = null;
+            TempData["Token"] = null;
+            TempData["Auth"] = null;
+            TempData["ViewModel"] = viewModel;
+            TempData["Playlist"] = (Playlist)TempData["Playlist"];
+            return RedirectToAction("Create","Playlist");
+        }
 
     }
 }

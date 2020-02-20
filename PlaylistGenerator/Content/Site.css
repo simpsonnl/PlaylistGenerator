@@ -31,7 +31,7 @@ textarea {
 }
 
 form-control {
-    width:500px;
+    /*width:500px;*/
 
 }
 
@@ -39,4 +39,41 @@ form-control {
     box-shadow: none;
 }
 
+.card_name {
+    visibility: hidden;
+}
 
+.card:hover .img{
+    webkit-filter: blur(2px); /* Chrome, Safari, Opera */
+    filter: blur(2px);
+    transform: scale(1.05);
+    /*transform: rotate(3deg);*/
+    
+}
+.card:hover .card-button {
+
+    
+}
+
+.card:hover .card_name {
+    /*transform: rotate(8deg) !important;*/
+}
+
+.card:hover .card_name {
+    visibility: visible;
+    opacity: 1;
+    text-shadow: 1px 1px black;
+}
+
+
+
+
+
+
+.card-body {
+    z-index: 2;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
