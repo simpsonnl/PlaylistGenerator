@@ -1,4 +1,5 @@
-﻿using PlaylistGenerator.ViewModels;
+﻿using PlaylistGenerator.Models;
+using PlaylistGenerator.ViewModels;
 using SpotifyAPI.Web;
 using SpotifyAPI.Web.Auth;
 using SpotifyAPI.Web.Enums;
@@ -21,84 +22,8 @@ namespace PlaylistGenerator.Controllers
         private string _clientId = "52c0f5ab6e5f4a2f83da6c5fad1c6bac";
         private string _secretId = "a66d0d708a1f49789372f50a65d2b3cc";
         private string _redirectURL = "https://localhost:44385/Authorize/Callback/";
-        class SpotifyAuthentication
-        {
-            
-            
-            
-        }
+        private string _redirectURLFromCreate = "https://localhost:44385/Authorize/CallbackFromCreate/";
 
-        SpotifyAuthentication sAuth = new SpotifyAuthentication();
-
-      
-        [HttpPost]
-        public async Task<ActionResult> Auth()
-        {
-            //TokenSwapWebAPIFactory webApiFactory;
-            //SpotifyWebAPI spotify;
-
-            //// You should store a reference to WebAPIFactory if you are using AutoRefresh or want to manually refresh it later on. New WebAPIFactory objects cannot refresh SpotifyWebAPI object that they did not give to you.
-            //webApiFactory = new TokenSwapWebAPIFactory("https://playlist-generator-token-swap.herokuapp.com/", Scope.None, "https://localhost:44385")
-            //{
-            //    Scope = Scope.UserReadPrivate | Scope.UserReadEmail | Scope.PlaylistReadPrivate,
-            //    AutoRefresh = true
-
-            //};
-
-            //// You may want to react to being able to use the Spotify service.
-            //// webApiFactory.OnAuthSuccess += (sender, e) => authorized = true;
-            //// You may want to react to your user's access expiring.
-            //// webApiFactory.OnAccessTokenExpired += (sender, e) => authorized = false;
-
-            //try
-            //{
-            //    spotify = await webApiFactory.GetWebApiAsync();
-            //    PrivateProfile profile = spotify.GetPrivateProfile();
-            //    // Synchronous way:
-            //    // spotify = webApiFactory.GetWebApiAsync().Result;
-            //}
-            //catch (Exception ex)
-            //{
-            //    // Example way to handle error reporting gracefully with your SpotifyWebAPI wrapper
-            //    // UpdateStatus($"Spotify failed to load: {ex.Message}");
-            //}
-            return null;
-
-            //AuthorizationCodeAuth auth = new AuthorizationCodeAuth(
-            // "52c0f5ab6e5f4a2f83da6c5fad1c6bac",
-            // "6e2bea1292b845b392725811ae29b026",
-            // "https://localhost:44385/",
-            // "https://localhost:44385",
-            // Scope.PlaylistReadPrivate | Scope.PlaylistReadCollaborative
-            //  );
-
-            //auth.AuthReceived += async (sender, payload) =>
-            //{
-            //    auth.Stop();
-            //    Token token = await auth.ExchangeCode(payload.Code);
-            //    SpotifyWebAPI api = new SpotifyWebAPI()
-            //    {
-            //        TokenType = token.TokenType,
-            //        AccessToken = token.AccessToken
-            //    };
-            //    // Do requests with API client
-            //    Console.WriteLine(api.AccessToken);
-            //};
-            //auth.Start(); // Starts an internal HTTP Server
-            //auth.OpenBrowser();
-
-
-
-
-            //var my_client_id = "52c0f5ab6e5f4a2f83da6c5fad1c6bac";
-            //var scopes = "user-read-private user-read-email";
-            //return Redirect("https://accounts.spotify.com/authorize" +
-            //          "?response_type=code" +
-            //          "&client_id=" + my_client_id +
-            //          "&scope=" + scopes +
-            //          "&redirect_uri=" + "https://localhost:44385/Authorize/Callback/");
-
-        }
 
         public async Task<ActionResult> Callback(string code)
         {
@@ -133,29 +58,7 @@ namespace PlaylistGenerator.Controllers
             IndexViewModel viewModel = new IndexViewModel();
 
             viewModel.profile = profile;
-            //if (code.Length > 0)
-            //{
-            //    using (HttpClient client = new HttpClient())
-            //    {
-            //        Console.WriteLine(Environment.NewLine + "Your basic bearer: " + Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes(_clientId + ":" + _secretId)));
-            //        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes(_clientId + ":" + _secretId)));
-
-            //        FormUrlEncodedContent formContent = new FormUrlEncodedContent(new[]
-            //        {
-            //            new KeyValuePair<string, string>("code", code),
-            //            new KeyValuePair<string, string>("redirect_uri", _redirectURL),
-            //            new KeyValuePair<string, string>("grant_type", "authorization_code"),
-            //        });
-
-            //        var response = client.PostAsync("https://accounts.spotify.com/api/token", formContent).Result;
-
-            //        var x = await response.Content.ReadAsStringAsync();
-            //        var test = x[2];
-            //        var responseContent = response.Content;
-            //        responseString = responseContent.ReadAsStringAsync().Result;
-
-            //    }
-            //}
+           
 
             TempData["Api"] = api;
             TempData["User"] = viewModel.profile;
@@ -170,6 +73,135 @@ namespace PlaylistGenerator.Controllers
                 
             //};
             
+        }
+        public async Task<ActionResult> CallbackFromCreate(string code)
+        {
+            AuthorizationCodeAuth auth = new AuthorizationCodeAuth(
+            _clientId,
+            _secretId,
+            _redirectURLFromCreate,
+            "http://localhost:44385",
+            Scope.PlaylistReadPrivate | Scope.PlaylistReadCollaborative
+            );
+
+
+            Token token = await auth.ExchangeCode(code);
+
+            SpotifyWebAPI api = new SpotifyWebAPI()
+            {
+                TokenType = token.TokenType,
+                AccessToken = token.AccessToken
+            };
+
+            PrivateProfile prof = api.GetPrivateProfile();
+            var tracks = await api.GetSavedTracksAsync();
+
+            if (token.IsExpired())
+            {
+                Token newToken = await auth.RefreshToken(token.RefreshToken);
+                api.AccessToken = newToken.AccessToken;
+                api.TokenType = newToken.TokenType;
+            }
+            PrivateProfile profile = await api.GetPrivateProfileAsync();
+            IndexViewModel viewModel = (IndexViewModel) TempData["ViewModel"];
+            viewModel.Playlist = (Playlist)TempData["Playlist"];
+            viewModel.profile = profile;
+            
+
+            TempData["Api"] = api;
+            TempData["User"] = viewModel.profile;
+            TempData["Token"] = token;
+            TempData["Auth"] = auth;
+            TempData["ViewModel"] = viewModel;
+            TempData["Playlist"] = (Playlist)TempData["Playlist"];
+            return RedirectToAction("Create", "Playlist");
+
+        }
+
+
+        public ActionResult Login()
+        {
+            bool isFromIndex = (bool)TempData["isFromIndex"];
+            if (isFromIndex)
+            {
+                return RedirectToAction("LoginFromIndex");
+            }
+            else
+            {
+
+                TempData["ViewModel"] = (IndexViewModel)TempData["ViewModel"];
+                TempData["Playlist"] = (Playlist)TempData["Playlist"];
+                return RedirectToAction("LoginFromCreate");
+            }
+        }
+
+        public ActionResult LoginFromIndex()
+        {
+            var my_client_id = "52c0f5ab6e5f4a2f83da6c5fad1c6bac";
+            var scopes = "user-read-private user-read-email user-read-recently-played user-top-read playlist-modify-public playlist-modify-private";
+            var redirect_uri = "https://localhost:44385/Authorize/Callback/";
+            
+
+            return Redirect("https://accounts.spotify.com/authorize?response_type=code&redirect_uri=" + redirect_uri + "&client_id=" + my_client_id + "&scope=" + scopes + "&show_dialog=true");
+        }
+
+        public ActionResult LoginFromCreate()
+        {
+            IndexViewModel viewModel = (IndexViewModel)TempData["ViewModel"];
+            TempData["ViewModel"] = viewModel;
+            TempData["Playlist"] = (Playlist)TempData["Playlist"];
+
+            var my_client_id = "52c0f5ab6e5f4a2f83da6c5fad1c6bac";
+            var scopes = "user-read-private user-read-email user-read-recently-played user-top-read playlist-modify-public playlist-modify-private";
+            var redirect_uri = "https://localhost:44385/Authorize/CallbackFromCreate/";
+
+
+            return Redirect("https://accounts.spotify.com/authorize?response_type=code&redirect_uri=" + redirect_uri + "&client_id=" + my_client_id + "&scope=" + scopes + "&show_dialog=true");
+
+            
+        }
+
+
+        public ActionResult Logout()
+        {
+            bool isFromIndex = (bool)TempData["isFromIndex"];
+            if (isFromIndex)
+            {
+                return RedirectToAction("LogoutFromIndex");
+            }
+            else
+            {
+
+                TempData["ViewModel"] = (IndexViewModel)TempData["ViewModel"];
+                TempData["Playlist"] = (Playlist)TempData["Playlist"];
+                return RedirectToAction("LogoutFromCreate");
+            }
+        }
+
+        public ActionResult LogoutFromIndex()
+        {
+            TempData["User"] = null;
+            TempData["Api"] = null;
+            TempData["Token"] = null;
+            TempData["Auth"] = null;
+
+            return RedirectToAction("Index", "Home");
+        }
+
+        public ActionResult LogoutFromCreate()
+        {
+            IndexViewModel viewModel = (IndexViewModel)TempData["ViewModel"];
+            viewModel.profile = null;
+            viewModel.recentTracks = null;
+            viewModel.topArtists = null;
+
+            TempData["User"] = null;
+            TempData["Api"] = null;
+            TempData["Token"] = null;
+            TempData["Auth"] = null;
+            TempData["ViewModel"] = viewModel;
+            TempData["Playlist"] = (Playlist)TempData["Playlist"];
+            return RedirectToAction("Create", "Playlist");
         }
     }
 }

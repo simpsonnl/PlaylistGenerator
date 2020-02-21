@@ -49,6 +49,7 @@
                 
         <div class="dropdown">
                 @*<div style="color:white; padding-right:20px; padding-top:15px;">Logout</div>*@
+            
                 <button class="rounded btn btn-light dropdown-toggle float-right" type="button" id="userButtonDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
                         style=@(Model.profile.Images.Count <= 0 ? "": "padding:6px 5px 2px 5px;")>
                     <img src="@(Model.profile.Images.Count <= 0 ? "" : Model.profile.Images[0].Url)"
@@ -56,9 +57,10 @@
                          @(Model.profile.Images.Count <= 0 ? "hidden" : "") />
                     @Model.profile.DisplayName
                 </button>
+            
 
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                    <a class="dropdown-item" href="@Url.Action("Logout", "Home")">Logout</a>
+                    <a class="dropdown-item" href="@Url.Action("Logout", "Authorize")">Logout</a>
                 </div>
             
         </div>
@@ -99,15 +101,8 @@
 
 
         $('#connectButton').click(function (res) {
-            var my_client_id = "52c0f5ab6e5f4a2f83da6c5fad1c6bac";
-            var scopes = "user-read-private user-read-email user-read-recently-played user-top-read playlist-modify-public playlist-modify-private";
-            //return Redirect("" +
-            //          "?response_type=code" +
-            //          "&client_id=" + my_client_id +
-            //          "&scope=" + scopes +
-            var redirect_uri = 'https://localhost:44385/Authorize/Callback/';
-            $(location).attr('href', "https://accounts.spotify.com/authorize?response_type=code&redirect_uri=" + redirect_uri + "&client_id=" + my_client_id + "&scope=" + scopes + "&show_dialog=true")
-
+            
+            location.href = '@Url.Action("Login","Authorize")';
         });
 
 

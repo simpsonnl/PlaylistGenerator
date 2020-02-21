@@ -128,49 +128,5 @@ namespace PlaylistGenerator.Controllers
 
             return j;
         }
-
-
-        public ActionResult Logout()
-        {
-            bool isFromIndex = (bool)TempData["isFromIndex"];
-            if (isFromIndex)
-            {
-                return RedirectToAction("LogoutFromIndex");
-            }
-            else 
-            {
-
-                TempData["ViewModel"] = (IndexViewModel)TempData["ViewModel"];
-                TempData["Playlist"] = (Playlist)TempData["Playlist"];
-                return RedirectToAction("LogoutFromCreate"); 
-            }
-        }
-
-        public ActionResult LogoutFromIndex() 
-        {
-            TempData["User"] = null;
-            TempData["Api"] = null;
-            TempData["Token"] = null;
-            TempData["Auth"] = null;
-            
-            return RedirectToAction("Index");
-        }
-
-        public ActionResult LogoutFromCreate()
-        {
-            IndexViewModel viewModel = (IndexViewModel)TempData["ViewModel"];
-            viewModel.profile = null;
-            viewModel.recentTracks = null;
-            viewModel.topArtists = null;
-
-            TempData["User"] = null;
-            TempData["Api"] = null;
-            TempData["Token"] = null;
-            TempData["Auth"] = null;
-            TempData["ViewModel"] = viewModel;
-            TempData["Playlist"] = (Playlist)TempData["Playlist"];
-            return RedirectToAction("Create","Playlist");
-        }
-
     }
 }

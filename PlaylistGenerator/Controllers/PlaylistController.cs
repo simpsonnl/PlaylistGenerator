@@ -22,6 +22,9 @@ namespace PlaylistGenerator.Controllers
             IndexViewModel viewModel = (IndexViewModel)TempData["ViewModel"];
             Token userToken = (Token)TempData["Token"];
             AuthorizationCodeAuth userAuth = (AuthorizationCodeAuth)TempData["Auth"];
+            viewModel.profile = (PrivateProfile)TempData["User"];
+            viewModel.api = (SpotifyWebAPI)TempData["Api"];
+            viewModel.Playlist = (Playlist)TempData["Playlist"];
 
             if (viewModel.profile != null)
             {
@@ -74,7 +77,8 @@ namespace PlaylistGenerator.Controllers
             };
 
             string artistId = inputId;
-
+            
+            
             if (isTrack)
             {
 
@@ -89,18 +93,38 @@ namespace PlaylistGenerator.Controllers
                 viewModel.title = viewModel.searchedArtist.Name + " Playlist";
                 viewModel.imageUrl = viewModel.searchedArtist.Images[1].Url;
             }
-            
 
+            List<string> trackArtistIds = new List<string>();
             SeveralArtists relatedArtists = new SeveralArtists();
-
             
-            relatedArtists = _spotify.GetRelatedArtists(artistId);
-            relatedArtists.Artists.Insert(0,(_spotify.GetArtist(artistId)));
-            
+            List<SeveralArtists> relatedArtistsLists = new List<SeveralArtists>();
 
-            viewModel.Playlist = getPlaylist(relatedArtists, numberOfTracks, range);
+            //if the search item was a track
+            //get all the artists from that track 
+            //then get all the related artists for those artists
+            if (isTrack)
+            {
+                relatedArtists.Artists = new List<FullArtist>();
+                foreach (var artist in viewModel.searchedTrack.Artists)
+                {
+                    trackArtistIds.Add(artist.Id);
+                }
+                foreach (var artist in trackArtistIds)
+                {
+                    relatedArtistsLists.Add(_spotify.GetRelatedArtists(artist));
+                }
+                
+                viewModel.Playlist = getPlaylistFromTrack(relatedArtistsLists, numberOfTracks, range, viewModel.searchedTrack.Id);
+            }
+            //if the search item was an artist, get the related artists
+            else
+            {
+                relatedArtists = _spotify.GetRelatedArtists(artistId);
+                relatedArtists.Artists.Insert(0, (_spotify.GetArtist(artistId)));
+                viewModel.Playlist = getPlaylistFromArtist(relatedArtists, numberOfTracks, range);
+            }
 
-          
+            TempData["Playlist"] = viewModel.Playlist;
             TempData["Token"] = userToken;
             TempData["Auth"] = userAuth;
             TempData["ViewModel"] = viewModel;
@@ -141,7 +165,7 @@ namespace PlaylistGenerator.Controllers
 
         
 
-        private SeveralArtists getRelatedArtists(string id, int scale)
+        private SeveralArtists getRelatedArtistsFromArtist(string id, int scale)
         {
             SeveralArtists relatedArtists = new SeveralArtists();
             relatedArtists = _spotify.GetRelatedArtists(id);
@@ -192,10 +216,108 @@ namespace PlaylistGenerator.Controllers
                     return null;
             }
         }
-        private Playlist getPlaylist(SeveralArtists relatedArtists, int size, int range)
+        private Playlist getPlaylistFromArtist(SeveralArtists relatedArtists, int size, int range)
         {
+            List<string> genres = new List<string>();
             int relatedArtistsCount = relatedArtists.Artists.Count;
             int artists = (int)((range / 5.0) * relatedArtistsCount);
+            var rand = new Random();
+            Playlist returnedPlaylist = new Playlist();
+            FullTrack track = new FullTrack();
+
+            SeveralTracks tracks = new SeveralTracks
+            {
+                Tracks = new List<FullTrack>()
+            };
+
+            //getting the searched artists genres
+            //it was atted to the 0th index of the list before the method was called
+            genres = relatedArtists.Artists[0].Genres;
+
+            for (int i = 0; i < artists; i++)
+            {
+                foreach (var genre in relatedArtists.Artists[i].Genres)
+                        {
+                            if (genres.Contains(genre))
+                            {
+                                tracks.Tracks.AddRange(_spotify.GetArtistsTopTracks(relatedArtists.Artists[i].Id, "US").Tracks);
+                                break;
+                            }
+                        } 
+                
+            }
+
+            //shuffles the list of tracks
+            int n = tracks.Tracks.Count;
+            while (n > 1)
+            {
+                n--;
+                int k = rand.Next(n + 1);
+                FullTrack temp = tracks.Tracks[k];
+                tracks.Tracks[k] = tracks.Tracks[n];
+                tracks.Tracks[n] = temp;
+            }
+
+            int count = 0;
+            int iterations = 0;
+            do
+                {
+                //tracks = _spotify.GetArtistsTopTracks(relatedArtists.Artists[rand.Next(0, artists)].Id, "US");
+
+                track = tracks.Tracks[iterations];
+                if (track != null && !returnedPlaylist.hasTrack(track.Id))
+                    {
+                        returnedPlaylist.TrackList.Add(track);
+                        count++;
+                    }
+                iterations++;
+            } while (count < size && iterations < tracks.Tracks.Count);
+            
+            return returnedPlaylist;
+        }
+
+        private Playlist getPlaylistFromTrack(List<SeveralArtists> relatedArtistsList, int size, int range, string searchTrackId)
+        {
+            int relatedArtistsCount = 0;
+            List<string> genres = new List<string>();
+            AudioFeatures searchTrackfeatures = _spotify.GetAudioFeatures(searchTrackId);
+            float searchTrackEnergy = searchTrackfeatures.Energy;
+            //float searchTrackTempo = searchTrackfeatures.Tempo;
+            //float searchTrackLoudness = searchTrackfeatures.Loudness;
+            SeveralArtists reOrderedArtists = new SeveralArtists();
+            reOrderedArtists.Artists = new List<FullArtist>();
+
+            foreach (var artistList in relatedArtistsList)
+            {
+                relatedArtistsCount += artistList.Artists.Count;
+                foreach (var artist in artistList.Artists)
+                {
+                    genres.AddRange(artist.Genres.ToList());
+                }
+            }
+            
+            int artists = (int)((range / 5.0) * relatedArtistsCount);
+            //in the case that the song has multiple artists,
+            //i don't want the list of related artists to be: related artists from the 1st, then 2nd then 3rd artist etc...
+            //i want them to be spread out evenly to give a better playlist based on the songs artists
+            
+            for (int i = 0; i < relatedArtistsCount; i++)
+            {
+                for (int j = 0; j < relatedArtistsList.Count; j++)
+                {
+                    if (i<relatedArtistsList[j].Artists.Count)
+                    {
+                        foreach (var genre in relatedArtistsList[j].Artists[i].Genres)
+                        {
+                            if (genres.Contains(genre))
+                            {
+                                reOrderedArtists.Artists.Add(relatedArtistsList[j].Artists[i]);
+                                break;
+                            }
+                        } 
+                    }
+                }
+            }
 
             var rand = new Random();
             Playlist returnedPlaylist = new Playlist();
@@ -205,29 +327,50 @@ namespace PlaylistGenerator.Controllers
             {
                 Tracks = new List<FullTrack>()
             };
-            int count = 0;
-            for (int i = 0; i < artists; i++)
+            
+            for (int i = 0; i < reOrderedArtists.Artists.Count; i++)
             {
-                tracks.Tracks.AddRange(_spotify.GetArtistsTopTracks(relatedArtists.Artists[i].Id, "US").Tracks);
+                tracks.Tracks.AddRange(_spotify.GetArtistsTopTracks(reOrderedArtists.Artists[i].Id, "US").Tracks);
             }
 
-            do
+            //shuffles the list of tracks
+            int n = tracks.Tracks.Count;
+            while (n > 1)
             {
-                //tracks = _spotify.GetArtistsTopTracks(relatedArtists.Artists[rand.Next(0, artists)].Id, "US");
+                n--;
+                int k = rand.Next(n + 1);
+                FullTrack temp = tracks.Tracks[k];
+                tracks.Tracks[k] = tracks.Tracks[n];
+                tracks.Tracks[n] = temp;
+            }
 
-                track = tracks.Tracks[rand.Next(0, tracks.Tracks.Count)];
-
-                if (track != null && !returnedPlaylist.hasTrack(track.Id))
+            int count = 0;
+            int iterations = 0;
+            do
                 {
-                    returnedPlaylist.TrackList.Add(track);
-                    count++;
-                }
+                    //tracks = _spotify.GetArtistsTopTracks(relatedArtists.Artists[rand.Next(0, artists)].Id, "US");
 
+                    track = tracks.Tracks[iterations];
 
-            } while (count < size);
+                    if (track != null && !returnedPlaylist.hasTrack(track.Id))
+                    {
+                        AudioFeatures features = _spotify.GetAudioFeatures(track.Id);
+                        float energy = features.Energy;
+                        float tempo = features.Tempo;
+                        //float danceability = features.Danceability;
+                        //float loudness = features.Loudness;
+                        if (energy >= (searchTrackEnergy-.15) && energy <= (searchTrackEnergy + .15)/* && tempo >= (searchTrackTempo - 10) && tempo <= (searchTrackTempo + 10)*/)
+                        
+                        {
+                            returnedPlaylist.TrackList.Add(track);
+                            count++;
+                        }
+                        
+                    }
 
-
-
+                iterations++;
+                } while (count < size && iterations < tracks.Tracks.Count);
+            
             return returnedPlaylist;
         }
 

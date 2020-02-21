@@ -4,11 +4,11 @@
     ViewBag.Title = "Create";
 }
 
-<hr style="border-top: 1px solid white;"/>
+<hr style="border-top: 1px solid white;" />
 
-    
 
-<div class="container justify-content-between" >
+
+<div class="container justify-content-between">
     <div class="row">
         <h2 style="color:white;">@Model.title</h2>
         <span style="color:white; padding:13px 0 0 10px;">(@Model.Playlist.TrackList.Count)</span>
@@ -41,32 +41,39 @@
         </div>
         @using (Html.BeginForm("Save", "Playlist", FormMethod.Post))
         {
-    <div class="col">
-        <div class="row">
-            <img src="@Model.imageUrl" width="277" height="277" />
-        </div>
-        <div hidden class="row form-check form-check-inline" style="padding-top:20px;">
-            <input class="form-check-inline" type="checkbox" name="isPublic" id="isPublic" value="false" />
-            <label class="form-check-label" for="isPublic" style="color:white;">Public Playlist</label>
-        </div>
-        <div class="row" style="padding-top:20px;" @(Model.profile == null ? "hidden" : "")>
-            <input class="form-control" type="text" id="playlistName" name="playlistName" style="width:277px; height:38px;" placeholder="Rename Playlist...(optional)" />
-        </div>
+            <div class="col">
+                <div class="row">
+                    <img src="@Model.imageUrl" width="277" height="277" />
+                </div>
+                <div hidden class="row form-check form-check-inline" style="padding-top:20px;">
+                    <input class="form-check-inline" type="checkbox" name="isPublic" id="isPublic" value="false" />
+                    <label class="form-check-label" for="isPublic" style="color:white;">Public Playlist</label>
+                </div>
+                <div class="row" style="padding-top:20px;" @(Model.profile == null ? "hidden" : "")>
+                    <input class="form-control" type="text" id="playlistName" name="playlistName" style="width:277px; height:38px;" placeholder="Rename Playlist...(optional)" />
+                </div>
 
-        <div class="row sticky-top" style="padding-top:20px;">
-            <button class="btn btn-light" type="
+                <div class="row sticky-top" style="padding-top:20px;">
+                    <button class="btn btn-light" id="@(Model.profile == null ? "login" : "")" type="
                         @(Model.profile == null ? "button" : "submit")"
-                    style="width:277px !important;">
-                @(Model.profile == null ? "Login to Save" : "Save to Spotify")
-            </button>
-        </div>
-    </div>
+                            style="width:277px !important;">
+                        @(Model.profile == null ? "Login to Save" : "Save to Spotify")
+                    </button>
+                </div>
+            </div>
         }
     </div>
 </div>
 
 @section Scripts{
+    
+
     <script type="text/javascript">
+        $('#login').click(function (res) {
+
+    location.href = '@Url.Action("Login", "Authorize")';
+    });
+
         function millisToMinutesAndSeconds(millis) {
             var minutes = Math.floor(millis / 60000);
             var seconds = ((millis % 60000) / 1000).toFixed(0);

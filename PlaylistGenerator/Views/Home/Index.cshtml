@@ -84,10 +84,10 @@
 
         <p id="imageSelectLabel" class="lead" @(Model.profile==null ? "hidden" : "") style="color:white;">Or select one your recent songs.</p>
         <div class="conainer">
-            <div id="recentTracks" class="row justify-content-between h-100" style="margin-right:0px !important; margin-left:0px !important;">
+            <div id="recentTracks" class="row justify-content-between" style="margin-right:0px !important; margin-left:0px !important;">
                 @foreach (var track in Model.recentTracks)
                 {
-                    <div>
+                    <div style="padding-bottom:10px;">
                         @using (Html.BeginForm("CreateFromCard", "Playlist", FormMethod.Post))
                         {
                             <input hidden name="numberOfTracks" class="numTracks" value="30"/>
@@ -108,10 +108,10 @@
             </div>
         </div>
             <div class="conainer justify-content-between">
-                <div id="recentArtists" class="row justify-content-between" style="width:1110px; margin-right:0px !important; margin-left:0px !important;">
+                <div id="recentArtists" class="row justify-content-between" style="margin-right:0px !important; margin-left:0px !important;">
                     @foreach (var artist in Model.topArtists)
                     {
-                    <div>
+                    <div style="padding-bottom:10px;">
                         @using (Html.BeginForm("CreateFromCard", "Playlist", FormMethod.Post))
                         {
                             <input hidden name="numberOfTracks" class="numTracks" value="30" />
