@@ -136,6 +136,7 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\AuthorizeController.cs" />
+    <Compile Include="Controllers\ErrorController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\PlaylistController.cs" />
     <Compile Include="Global.asax.cs">
@@ -161,6 +162,13 @@
     <Content Include="Content\bootstrap2-toggle.css" />
     <Content Include="Content\bootstrap2-toggle.min.css" />
     <Content Include="Content\bootstrap4-toggle.min.css" />
+    <Content Include="Content\fonts\ApexFlunkee-Regular.svg" />
+    <Content Include="Content\Images\exclamation.png" />
+    <Content Include="Content\Images\redExclamation.png" />
+    <Content Include="Content\Images\UIHere.png" />
+    <Content Include="Content\Kayak.svg" />
+    <Content Include="Content\SFSquareHead.svg" />
+    <Content Include="Content\Square.svg" />
     <Content Include="Content\themes\base\accordion.css" />
     <Content Include="Content\themes\base\all.css" />
     <Content Include="Content\themes\base\autocomplete.css" />
@@ -237,6 +245,28 @@
     <Content Include="Scripts\bootstrap2-toggle.min.js.map" />
     <Content Include="Scripts\bootstrap-toggle.min.js.map" />
     <None Include=".bin\node.cmd" />
+    <Content Include="Content\Inlanders Demo.otf" />
+    <Content Include="Content\Square.ttf" />
+    <Content Include="Content\Square.eot" />
+    <Content Include="Content\Square.otf" />
+    <Content Include="Content\Square.woff" />
+    <Content Include="Content\Square.woff2" />
+    <Content Include="Content\SFSquareHead.eot" />
+    <Content Include="Content\SFSquareHead.otf" />
+    <Content Include="Content\SFSquareHead.ttf" />
+    <Content Include="Content\SFSquareHead.woff" />
+    <Content Include="Content\SFSquareHead.woff2" />
+    <Content Include="Content\fonts\ApexFlunkee-Regular.eot" />
+    <Content Include="Content\fonts\ApexFlunkee-Regular.otf" />
+    <Content Include="Content\fonts\ApexFlunkee-Regular.ttf" />
+    <Content Include="Content\fonts\ApexFlunkee-Regular.woff" />
+    <Content Include="Content\fonts\ApexFlunkee-Regular.woff2" />
+    <Content Include="Content\Kayak.eot" />
+    <Content Include="Content\Kayak.otf" />
+    <Content Include="Content\Kayak.ttf" />
+    <Content Include="Content\Kayak.woff" />
+    <Content Include="Content\Kayak.woff2" />
+    <None Include="Properties\PublishProfiles\SpotifyPlaylistGenerator - Web Deploy.pubxml" />
     <None Include="Scripts\jquery-3.4.1.intellisense.js" />
     <Content Include="Scripts\jquery-3.4.1.js" />
     <Content Include="Scripts\jquery-3.4.1.min.js" />
@@ -254,6 +284,7 @@
     <Content Include="Scripts\popper-utils.min.js" />
     <Content Include="Scripts\popper.js" />
     <Content Include="Scripts\popper.min.js" />
+    <Content Include="Scripts\Site.js" />
     <Content Include="Scripts\src\index.js" />
     <Content Include="Scripts\src\methods\defaults.js" />
     <Content Include="Scripts\src\methods\destroy.js" />
@@ -330,7 +361,7 @@
     </Content>
     <Content Include="Views\Web.config" />
     <Content Include="Views\_ViewStart.cshtml" />
-    <Content Include="Views\Shared\Error.cshtml" />
+    <Content Include="Views\Error\NotFound.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Scripts\umd\popper.min.js.map" />
@@ -343,8 +374,9 @@
     <Content Include="Scripts\popper.js.map" />
     <Content Include="Scripts\popper-utils.min.js.map" />
     <Content Include="Scripts\popper-utils.js.map" />
-    <Content Include="Views\Home\Search.cshtml" />
     <Content Include="Views\Playlist\Create.cshtml" />
+    <Content Include="Views\Error\NoItemSelected.cshtml" />
+    <Content Include="Views\Error\SomethingWentWrong.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

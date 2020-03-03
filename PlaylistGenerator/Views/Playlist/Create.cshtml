@@ -4,14 +4,23 @@
     ViewBag.Title = "Create";
 }
 
+
+    <div id="page-loading" hidden>
+        <div class="three-balls">
+            <div class="ball ball1"></div>
+            <div class="ball ball2"></div>
+            <div class="ball ball3"></div>
+        </div>
+    </div>
+
 <hr style="border-top: 1px solid white;" />
 
 
 
 <div class="container justify-content-between">
     <div class="row">
-        <h2 style="color:white;">@Model.title</h2>
-        <span style="color:white; padding:13px 0 0 10px;">(@Model.Playlist.TrackList.Count)</span>
+        <h3 class="playlist_title">@Model.title</h3>
+        @*<span class="track_count">@Model.Playlist.TrackList.Count</span>*@
     </div>
     <div class="row">
 
@@ -33,7 +42,7 @@
                             <td><img src="@track.Album.Images[2].Url" width="30" height="30" /></td>
                             <td>@track.Name</td>
                             <td>@track.Artists[0].Name</td>
-                            <td class="length">@track.DurationMs</td>
+                            <td>@Model.trackLengths[track.Id]</td>
                         </tr>
                     }
                 </tbody>
@@ -50,12 +59,12 @@
                     <label class="form-check-label" for="isPublic" style="color:white;">Public Playlist</label>
                 </div>
                 <div class="row" style="padding-top:20px;" @(Model.profile == null ? "hidden" : "")>
-                    <input class="form-control" type="text" id="playlistName" name="playlistName" style="width:277px; height:38px;" placeholder="Rename Playlist...(optional)" />
+                    <input class="form-control" type="text" id="playlistName" name="playlistName" placeholder="Rename Playlist...(optional)" />
                 </div>
 
                 <div class="row sticky-top" style="padding-top:20px;">
-                    <button class="btn btn-light" id="@(Model.profile == null ? "login" : "")" type="
-                        @(Model.profile == null ? "button" : "submit")"
+                    <button class="btn btn-light" id="@(Model.profile == null ? "login" : "save-button")" 
+                            type="@(Model.profile == null ? "button" : "submit")"
                             style="width:277px !important;">
                         @(Model.profile == null ? "Login to Save" : "Save to Spotify")
                     </button>
@@ -64,135 +73,3 @@
         }
     </div>
 </div>
-
-@section Scripts{
-    
-
-    <script type="text/javascript">
-        $('#login').click(function (res) {
-
-    location.href = '@Url.Action("Login", "Authorize")';
-    });
-
-        function millisToMinutesAndSeconds(millis) {
-            var minutes = Math.floor(millis / 60000);
-            var seconds = ((millis % 60000) / 1000).toFixed(0);
-            return minutes + ":" + (seconds < 10 ? '0' : '') + seconds;
-        }
-        var x = document.getElementsByClassName("length");
-        for (var i = 0; i < x.length; i++) {
-            var ms = x[i].innerHTML;
-            x[i].innerHTML = millisToMinutesAndSeconds(ms);
-        }
-    </script>
-}
-@*@section Scripts{
-        <script src="https://sdk.scdn.co/spotify-player.js"></script>
-        <script>
-            window.onSpotifyWebPlaybackSDKReady = () => {
-      const play = ({
-              spotify_uri,
-              playerInstance: {
-                _options: {
-                  getOAuthToken,
-                  id
-                }
-              }
-            }) => {
-              getOAuthToken(access_token => {
-                fetch(`https://api.spotify.com/v1/me/player/play?device_id=${id}`, {
-                  method: 'PUT',
-                  body: JSON.stringify({ uris: [spotify_uri] }),
-                  headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${access_token}`
-                  },
-                });
-              });
-            };
-
-            play({
-              playerInstance: new Spotify.Player({ name: "..." }),
-              spotify_uri: 'spotify:track:7xGfFoTpQ2E7fRF5lN10tr',
-            });
-    };
-
-            //window.onSpotifyWebPlaybackSDKReady = () => {
-            //    const token = 'BQDvm0zwis3Hiopm_XqOO_yjDxQi8W7rVLE0cDO1VG2WqE3eSBY0feFNs5pGN_DYMzQKL-t_IEP27C6aW2YFlwMnCoOMKGVWHzW0GxC-FSs2Lf-4GLz3LO0d-HZziQQXvY9fOeBVQTStjt_ebt5tdOPGwKtbRkBYIMA';
-            //    const player = new Spotify.Player({
-            //        name: 'Web Playback SDK Quick Start Player',
-            //        getOAuthToken: cb => { cb(token); }
-            //    });
-
-            //    // Error handling
-            //    player.addListener('initialization_error', ({ message }) => { console.error(message); });
-            //    player.addListener('authentication_error', ({ message }) => { console.error(message); });
-            //    player.addListener('account_error', ({ message }) => { console.error(message); });
-            //    player.addListener('playback_error', ({ message }) => { console.error(message); });
-
-            //    // Playback status updates
-            //    player.addListener('player_state_changed', state => { console.log(state); });
-
-            //    // Ready
-            //    player.addListener('ready', ({ device_id }) => {
-            //        console.log('Ready with Device ID', device_id);
-            //    });
-
-            //    // Not Ready
-            //    player.addListener('not_ready', ({ device_id }) => {
-            //        console.log('Device ID has gone offline', device_id);
-            //    });
-
-            //    // Connect to the player!
-            //    player.connect.then(success => {
-            //        if (success) {
-            //            console.log('The Web Playback SDK successfully connected to Spotify!');
-            //        }
-            //    });
-            //};
-        </script>
-    }*@
-
-@*<html>
-    <head>
-        <title>Spotify Web Playback SDK Quick Start Tutorial</title>
-    </head>
-    <body>
-        <h1>Spotify Web Playback SDK Quick Start Tutorial</h1>
-        <h2>Open your console log: <code>View > Developer > JavaScript Console</code></h2>
-
-        <script src="https://sdk.scdn.co/spotify-player.js"></script>
-        <script>
-            window.onSpotifyWebPlaybackSDKReady = () => {
-                const token = 'BQDBlDX3UFdW_QDe3ipjeIj89rzYDbiFE0YwREppryhCTcye8NIo759JDLKtguJXwklPRmxjbSOGWm0ISFWlxDcUkpcGOncaXzV_DPj3R4ozDNbtquaSOHB1zP4k07W6-FGAe2HOH-x5xTyJ9teAcRYrYzG6gTwUvWs';
-                const player = new Spotify.Player({
-                    name: 'Web Playback SDK Quick Start Player',
-                    c
-                    getOAuthToken: cb => { cb(token); }
-                });
-
-                // Error handling
-                player.addListener('initialization_error', ({ message }) => { console.error(message); });
-                player.addListener('authentication_error', ({ message }) => { console.error(message); });
-                player.addListener('account_error', ({ message }) => { console.error(message); });
-                player.addListener('playback_error', ({ message }) => { console.error(message); });
-
-                // Playback status updates
-                player.addListener('player_state_changed', state => { console.log(state); });
-
-                // Ready
-                player.addListener('ready', ({ device_id }) => {
-                    console.log('Ready with Device ID', device_id);
-                });
-
-                // Not Ready
-                player.addListener('not_ready', ({ device_id }) => {
-                    console.log('Device ID has gone offline', device_id);
-                });
-
-                // Connect to the player!
-                player.connect();
-            };
-        </script>
-    </body>
-    </html>*@

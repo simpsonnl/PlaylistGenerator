@@ -12,7 +12,7 @@ namespace PlaylistGenerator.ViewModels
     {
         public IndexViewModel()
         {
-            recentTracks = new List<FullTrack>();
+            recentTracks = new Playlist();
             topArtists = new List<FullArtist>();
         }
         public Search search { get; set; }
@@ -20,7 +20,7 @@ namespace PlaylistGenerator.ViewModels
         public FullTrack searchTrack { get; set; }
         public PrivateProfile profile { get; set; }
         public SpotifyWebAPI api { get; set; }
-        public List<FullTrack> recentTracks { get; set; }
+        public Playlist recentTracks { get; set; }
         public List<FullArtist> topArtists { get; set; }
         public Playlist Playlist { get; set; }
         public FullTrack searchedTrack { get; set; }
@@ -30,6 +30,7 @@ namespace PlaylistGenerator.ViewModels
         public string title { get; set; }
         public string imageUrl { get; set; }
         public bool isFromIndex { get; set; }
+        public Dictionary<string,string> trackLengths { get; set; }
 
     }
 }

@@ -13,6 +13,7 @@ using System.Web.Mvc;
 
 namespace PlaylistGenerator.Controllers
 {
+    
     public class HomeController : Controller
     {
         private static SpotifyWebAPI _spotify;
@@ -23,6 +24,11 @@ namespace PlaylistGenerator.Controllers
         public HomeController()
         {
             
+        }
+        [HandleError]
+        public ActionResult Error() 
+        {
+            return View();
         }
 
         public async Task<ActionResult> Index(IndexViewModel viewModel)
@@ -48,6 +54,9 @@ namespace PlaylistGenerator.Controllers
                 CursorPaging<PlayHistory> histories = viewModel.api.GetUsersRecentlyPlayedTracks(20);
                 Paging<FullArtist> artists = viewModel.api.GetUsersTopArtists(TimeRangeType.ShortTerm, 20);
 
+
+                //fix this so that the two loops are combined and there are no duplicate tracks being added
+                //becase histories can have duplicates if the user plays the song multiple times 
                 Random rand = new Random();
                 List<int> randNumbs = new List<int>();
                 do {
@@ -58,14 +67,21 @@ namespace PlaylistGenerator.Controllers
                     }
                 } while (randNumbs.Count < 5);
 
-                for (int i = 0; i < 5; i++)
+                viewModel.recentTracks = new Playlist();
+
+                for (int i = 0; viewModel.recentTracks.TrackList.Count < 5; i++)
                 {
                     viewModel.topArtists.Add(artists.Items[randNumbs[i]]);
                     
                     string trackId = histories.Items[randNumbs[i]].Track.Id;
-                    viewModel.recentTracks.Add(viewModel.api.GetTrack(trackId));
+                    if (!viewModel.recentTracks.hasTrack(trackId))
+                    {
+                        viewModel.recentTracks.TrackList.Add(viewModel.api.GetTrack(trackId));
+                    }
+                    
                 }
             }
+            ViewBag.FlashMessage = (string)TempData["FlashMessage"];
             TempData["User"] = viewModel.profile;
             TempData["Api"] = viewModel.api;
             TempData["Token"] = token;
