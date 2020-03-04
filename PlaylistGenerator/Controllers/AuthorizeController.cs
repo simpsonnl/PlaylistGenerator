@@ -24,9 +24,12 @@ namespace PlaylistGenerator.Controllers
         //private string _redirectURL = "https://localhost:44385/Authorize/Callback/";
         //private string _redirectURLFromCreate = "https://localhost:44385/Authorize/CallbackFromCreate/";
         //private string _serverURI = "https://localhost:44385/";
-        private string _redirectURL = "https://spotifyplaylistgenerator.azurewebsites.net/Authorize/Callback/";
-        private string _redirectURLFromCreate = "https://spotifyplaylistgenerator.azurewebsites.net/Authorize/CallbackFromCreate/";
-        private string _serverURI = "https://spotifyplaylistgenerator.azurewebsites.net/";
+        //private string _redirectURL = "https://spotifyplaylistgenerator.azurewebsites.net/Authorize/Callback/";
+        //private string _redirectURLFromCreate = "https://spotifyplaylistgenerator.azurewebsites.net/Authorize/CallbackFromCreate/";
+        //private string _serverURI = "https://spotifyplaylistgenerator.azurewebsites.net/";
+        private string _redirectURL = "https://playlistgenerator.net/Authorize/Callback/";
+        private string _redirectURLFromCreate = "https://playlistgenerator.net/Authorize/CallbackFromCreate/";
+        private string _serverURI = "https://playlistgenerator.net/";
         private string _authorizeRedirect = "https://accounts.spotify.com/authorize?response_type=code&redirect_uri=";
 
 

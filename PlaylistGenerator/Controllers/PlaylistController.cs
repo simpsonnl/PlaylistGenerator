@@ -411,7 +411,7 @@ namespace PlaylistGenerator.Controllers
             {
                 response = api.AddPlaylistTrack(playlist.Id,track.Uri);
             }
-            TempData["FlashMessage"] = "Playlist was successfully created and saved to your Spotify account!";
+            TempData["FlashMessage"] = name + " was successfully created and saved to your Spotify account!";
 
 
             if (!response.HasError())

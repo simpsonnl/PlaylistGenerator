@@ -2,7 +2,7 @@
 $(document).ready(function () {
     
     $('#login').click(function () {
-        location.href = "https://playlistgenerator20200223044833.azurewebsites.net/Authorize/Login/";
+        location.href = "https://playlistgenerator.net/Authorize/Login/";
     });
 
 

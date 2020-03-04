@@ -164,6 +164,10 @@
     <Content Include="Content\bootstrap4-toggle.min.css" />
     <Content Include="Content\fonts\ApexFlunkee-Regular.svg" />
     <Content Include="Content\Images\exclamation.png" />
+    <Content Include="Content\Images\icon.png" />
+    <Content Include="Content\Images\icon_small_letters.png" />
+    <Content Include="Content\Images\icon_space_between.png" />
+    <Content Include="Content\Images\icon_transparent.png" />
     <Content Include="Content\Images\redExclamation.png" />
     <Content Include="Content\Images\UIHere.png" />
     <Content Include="Content\Kayak.svg" />
