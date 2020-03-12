@@ -38,7 +38,7 @@
                 <tbody>
                     @foreach (var track in Model.Playlist.TrackList)
                     {
-                        <tr>
+                        <tr onclick="window.open('http://open.spotify.com/track/@track.Id','_blank')">
                             <td><img src="@track.Album.Images[2].Url" width="30" height="30" /></td>
                             <td>@track.Name</td>
                             <td>@track.Artists[0].Name</td>

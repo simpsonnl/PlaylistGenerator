@@ -21,21 +21,20 @@ namespace PlaylistGenerator.Controllers
     {
         private string _clientId = "52c0f5ab6e5f4a2f83da6c5fad1c6bac";
         private string _secretId = "a66d0d708a1f49789372f50a65d2b3cc";
-        //private string _redirectURL = "https://localhost:44385/Authorize/Callback/";
-        //private string _redirectURLFromCreate = "https://localhost:44385/Authorize/CallbackFromCreate/";
-        //private string _serverURI = "https://localhost:44385/";
+        private string _redirectURL = "https://localhost:44385/Authorize/Callback/";
+        private string _redirectURLFromCreate = "https://localhost:44385/Authorize/CallbackFromCreate/";
+        private string _serverURI = "https://localhost:44385/";
         //private string _redirectURL = "https://spotifyplaylistgenerator.azurewebsites.net/Authorize/Callback/";
         //private string _redirectURLFromCreate = "https://spotifyplaylistgenerator.azurewebsites.net/Authorize/CallbackFromCreate/";
         //private string _serverURI = "https://spotifyplaylistgenerator.azurewebsites.net/";
-        private string _redirectURL = "https://playlistgenerator.net/Authorize/Callback/";
-        private string _redirectURLFromCreate = "https://playlistgenerator.net/Authorize/CallbackFromCreate/";
-        private string _serverURI = "https://playlistgenerator.net/";
+        //private string _redirectURL = "https://playlistgenerator.net/Authorize/Callback/";
+        //private string _redirectURLFromCreate = "https://playlistgenerator.net/Authorize/CallbackFromCreate/";
+        //private string _serverURI = "https://playlistgenerator.net/";
         private string _authorizeRedirect = "https://accounts.spotify.com/authorize?response_type=code&redirect_uri=";
 
-
+        //callback method used if login from "/"
         public async Task<ActionResult> Callback(string code)
         {
-        //    string responseString = "";
             AuthorizationCodeAuth auth = new AuthorizationCodeAuth(
             _clientId,
             _secretId,
@@ -53,9 +52,6 @@ namespace PlaylistGenerator.Controllers
                 AccessToken = token.AccessToken
             };
 
-            PrivateProfile prof = api.GetPrivateProfile();
-            var tracks = await api.GetSavedTracksAsync();
-
             if (token.IsExpired())
             {
                 Token newToken = await auth.RefreshToken(token.RefreshToken);
@@ -72,16 +68,10 @@ namespace PlaylistGenerator.Controllers
             TempData["User"] = viewModel.profile;
             TempData["Token"] = token;
             TempData["Auth"] = auth;
-            return RedirectToAction("Index", "Home");
-            //return new JsonResult
-            //{
-            //    ContentType = "application/json",
-            //    Data = responseString,
-            //    JsonRequestBehavior = JsonRequestBehavior.AllowGet
-                
-            //};
-            
+            return RedirectToAction("Index", "Home");            
         }
+
+        //callback method used if login from "playlist/create"
         public async Task<ActionResult> CallbackFromCreate(string code)
         {
             AuthorizationCodeAuth auth = new AuthorizationCodeAuth(
@@ -100,9 +90,6 @@ namespace PlaylistGenerator.Controllers
                 TokenType = token.TokenType,
                 AccessToken = token.AccessToken
             };
-
-            PrivateProfile prof = api.GetPrivateProfile();
-            var tracks = await api.GetSavedTracksAsync();
 
             if (token.IsExpired())
             {
@@ -126,7 +113,7 @@ namespace PlaylistGenerator.Controllers
 
         }
 
-
+        //sends you to the proper login method
         public ActionResult Login()
         {
             bool isFromIndex = (bool)TempData["isFromIndex"];
@@ -143,16 +130,18 @@ namespace PlaylistGenerator.Controllers
             }
         }
 
+        //login from "/"
         public ActionResult LoginFromIndex()
         {
             var my_client_id = "52c0f5ab6e5f4a2f83da6c5fad1c6bac";
-            var scopes = "user-read-private user-read-email user-read-recently-played user-top-read playlist-modify-public playlist-modify-private streaming";
+            var scopes = "user-read-private user-read-email user-read-recently-played user-top-read playlist-modify-public playlist-modify-private";
             var redirect_uri = _redirectURL;
             
 
             return Redirect(_authorizeRedirect + redirect_uri + "&client_id=" + my_client_id + "&scope=" + scopes + "&show_dialog=true");
         }
 
+        //login from "playlist/create"
         public ActionResult LoginFromCreate()
         {
             IndexViewModel viewModel = (IndexViewModel)TempData["ViewModel"];
@@ -186,6 +175,7 @@ namespace PlaylistGenerator.Controllers
             }
         }
 
+        //logout from "/"
         public ActionResult LogoutFromIndex()
         {
             TempData["User"] = null;
@@ -196,6 +186,7 @@ namespace PlaylistGenerator.Controllers
             return RedirectToAction("Index", "Home");
         }
 
+        //logout from "/"
         public ActionResult LogoutFromCreate()
         {
             IndexViewModel viewModel = (IndexViewModel)TempData["ViewModel"];

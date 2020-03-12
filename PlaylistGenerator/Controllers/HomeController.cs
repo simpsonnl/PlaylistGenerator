@@ -33,6 +33,7 @@ namespace PlaylistGenerator.Controllers
 
         public async Task<ActionResult> Index(IndexViewModel viewModel)
         {
+            TempData["Playlist"] = null;
             viewModel.isFromIndex = true;
             viewModel.profile = (PrivateProfile) TempData["User"];
             viewModel.api = (SpotifyWebAPI)TempData["Api"];
@@ -54,42 +55,84 @@ namespace PlaylistGenerator.Controllers
                 CursorPaging<PlayHistory> histories = viewModel.api.GetUsersRecentlyPlayedTracks(20);
                 Paging<FullArtist> artists = viewModel.api.GetUsersTopArtists(TimeRangeType.ShortTerm, 20);
 
-
-                //fix this so that the two loops are combined and there are no duplicate tracks being added
-                //becase histories can have duplicates if the user plays the song multiple times 
+                //creates a random list from 0 to the number of recent tracks and 0 to recent artists
+                //then shuffled to be used to display random recent artists and tracks 
+                //did the same thing for both for the case that there are not 20 recent artists or tracks to get
+                //the lists might then be different sizes and could throw an index out of bounds error
                 Random rand = new Random();
-                List<int> randNumbs = new List<int>();
-                do {
-                    int num = rand.Next(0, artists.Items.Count);
-                    if (!randNumbs.Contains(num))
-                    {
-                        randNumbs.Add(num);
-                    }
-                } while (randNumbs.Count < 5);
+                List<int> randArtistNumbs = new List<int>();
+                List<int> randTrackNumbs = new List<int>();
 
-                viewModel.recentTracks = new Playlist();
-
-                for (int i = 0; viewModel.recentTracks.TrackList.Count < 5; i++)
+                for (int i = 0; i < artists.Items.Count; i++)
                 {
-                    viewModel.topArtists.Add(artists.Items[randNumbs[i]]);
-                    
-                    string trackId = histories.Items[randNumbs[i]].Track.Id;
+                    randArtistNumbs.Add(i);
+                }
+                for (int i = 0; i < histories.Items.Count; i++)
+                {
+                    randTrackNumbs.Add(i);
+                }
+
+                //shuffles the list of artist numbers
+                int n = randArtistNumbs.Count;
+                while (n > 1)
+                {
+                    n--;
+                    int k = rand.Next(n + 1);
+                    int temp = randTrackNumbs[k];
+                    randTrackNumbs[k] = randTrackNumbs[n];
+                    randTrackNumbs[n] = temp;
+                }
+
+                //shuffle list of track numbers
+                int m = randTrackNumbs.Count;
+                while (m > 1)
+                {
+                    m--;
+                    int k = rand.Next(m + 1);
+                    int temp = randTrackNumbs[k];
+                    randTrackNumbs[k] = randTrackNumbs[m];
+                    randTrackNumbs[m] = temp;
+                }
+
+                //adds up to 5 recent artists to the top artists view property
+                for (int i = 0; i < 5; i++)
+                {
+                    if (artists.Items[randArtistNumbs[i]] != null)
+                    {
+                        viewModel.topArtists.Add(artists.Items[randArtistNumbs[i]]);
+                    }
+                }
+                //adds non duplicate tracks to the recent tracks property
+                viewModel.recentTracks = new Playlist();
+                int count = 0;
+                while(viewModel.recentTracks.TrackList.Count < 5 && count < randTrackNumbs.Count)
+                {
+                    string trackId = histories.Items[randTrackNumbs[count]].Track.Id;
                     if (!viewModel.recentTracks.hasTrack(trackId))
                     {
                         viewModel.recentTracks.TrackList.Add(viewModel.api.GetTrack(trackId));
                     }
-                    
+                    count++;
                 }
             }
+
             ViewBag.FlashMessage = (string)TempData["FlashMessage"];
+
+            if (TempData["isError"] != null)
+            {
+                ViewBag.isError = (bool)TempData["isError"];
+            }
+            
             TempData["User"] = viewModel.profile;
             TempData["Api"] = viewModel.api;
             TempData["Token"] = token;
             TempData["Auth"] = auth;
             TempData["isFromIndex"] = true;
-
+            TempData["ViewModel"] = viewModel;
             return View(viewModel);
         }
+
+        //called by the search bar to display send back a json result of the top 5 track results from the search item in the US
         [HttpPost]
         public async Task<JsonResult> SearchTrack(string query)
         {
@@ -99,8 +142,6 @@ namespace PlaylistGenerator.Controllers
                 AccessToken = token.AccessToken,
                 TokenType = token.TokenType
             };
-
-            
 
             var searchItems = _spotify.SearchItems(query, SearchType.Track, 5, 0, "US").Tracks.Items;
 
@@ -130,6 +171,7 @@ namespace PlaylistGenerator.Controllers
             return searchItemsJson ;
         }
 
+        //called by the search bar to display send back a json result of the top 5 artist results from the search item in the US
         [HttpPost]
         public async Task<JsonResult> SearchArtistTerm(string query)
         {

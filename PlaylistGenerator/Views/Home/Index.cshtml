@@ -14,7 +14,7 @@
     </div>
 
     <div style="margin-top:30px;">
-        <div class="alert alert-success alert-dismissible fade show" role="alert" @(ViewBag.FlashMessage == null ? "hidden" : "")>
+        <div class="alert @(ViewBag.isError == true ? "alert-danger" : "alert-success") alert-dismissible fade show" role="alert" @(ViewBag.FlashMessage == null ? "hidden" : "")>
             @ViewBag.FlashMessage
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
@@ -32,7 +32,7 @@
                     <input type="hidden" id="isTrack" name="isTrack" value="true" />
                     <div class="row d-flex justify-content-between" style="margin-right:0px !important; margin-left:0px !important;">
 
-                        <div class="form-row w-100 justify-content-between"style="margin-right:0px !important; margin-left:0px !important;">
+                        <div class="form-row w-100 justify-content-between" style="margin-right:0px !important; margin-left:0px !important;">
                             <input id="searchTrack_Name" type="search" class="form-control no-gutters" placeholder="Search for a song..." name="query" spellcheck="false" />
 
                             <button disabled id="submit" type="submit" class="btn btn-light rounded">Generate</button>
@@ -78,55 +78,63 @@
 
             </div>
         }
+        @if (!(Model.recentTracks == null))
+        {
 
-        <p id="imageSelectLabel" class="lead" @(Model.profile == null ? "hidden" : "")>Or select one your recent songs.</p>
-        <div class="conainer">
-            <div id="recentTracks" class="row justify-content-between" style="margin-right:0px !important; margin-left:0px !important;">
-                @foreach (var track in Model.recentTracks.TrackList)
-                {
-                    <div style="padding-bottom:10px;">
-                        @using (Html.BeginForm("CreateFromCard", "Playlist", FormMethod.Post))
-                        {
-                            <input hidden name="numberOfTracks" class="numTracks" value="30" />
-                            <input hidden name="range" class="range" value="3" />
-                            <input hidden name="isTrack" value="true" />
-                            <input hidden name="inputId" value="@track.Id" />
 
-                            <div class="card" style=" max-height:202px; max-width:204px; position:relative;">
-                                <button onclick="$('#page-loading').removeAttr('hidden');" class="card-button" type="submit" style="padding:0;border:none;">
-                                    <img class="img card-img-top" src="@track.Album.Images[0].Url" height="200" width="200" style="border-radius: 2%;" />
-                                </button>
-                                <a onclick="this.closest('form').submit();return false;"><div class="card_name card-body text-white rgba-black-light p-2">@track.Name</div></a>
-                            </div>
+            <p id="imageSelectLabel" class="lead" @(Model.profile == null ? "hidden" : "")>Or select one your recent songs.</p>
+            <div class="conainer">
+                <div id="recentTracks" class="row justify-content-between" style="margin-right:0px !important; margin-left:0px !important;">
+                    @foreach (var track in Model.recentTracks.TrackList)
+                    {
+                        <div style="padding-bottom:10px;">
+                            @using (Html.BeginForm("CreateFromCard", "Playlist", FormMethod.Post))
+                            {
+                                <input hidden name="numberOfTracks" class="numTracks" value="30" />
+                                <input hidden name="range" class="range" value="3" />
+                                <input hidden name="isTrack" value="true" />
+                                <input hidden name="inputId" value="@track.Id" />
 
-                        }
-                    </div>
-                }
+                                <div class="card" style=" max-height:202px; max-width:204px; position:relative;">
+                                    <button onclick="$('#page-loading').removeAttr('hidden');" class="card-button" type="submit" style="padding:0;border:none;">
+                                        <img class="img card-img-top" src="@track.Album.Images[0].Url" height="200" width="200" style="border-radius: 2%;" />
+                                    </button>
+                                    <a onclick="this.closest('form').submit();return false;"><div class="card_name card-body text-white rgba-black-light p-2">@track.Name</div></a>
+                                </div>
+
+                            }
+                        </div>
+                    }
+                </div>
             </div>
-        </div>
-        <div class="conainer justify-content-between">
-            <div id="recentArtists" class="row justify-content-between" style="margin-right:0px !important; margin-left:0px !important;">
-                @foreach (var artist in Model.topArtists)
-                {
-                    <div style="padding-bottom:10px;">
-                        @using (Html.BeginForm("CreateFromCard", "Playlist", FormMethod.Post))
-                        {
-                            <input hidden name="numberOfTracks" class="numTracks" value="30" />
-                            <input hidden name="range" class="range" value="3" />
-                            <input hidden name="isTrack" value="false" />
-                            <input hidden name="inputId" value="@artist.Id" />
+        }
+        @if (!(Model.topArtists == null))
+        {
 
-                            <div class="card" style=" max-height:202px; max-width:204px; position:relative;">
-                                <button onclick="$('#page-loading').removeAttr('hidden');" class="card-button" type="submit" style="padding:0;border:none; background-color:#343a40;">
-                                    <img class="img card-img-top" src="@artist.Images[0].Url" height="200" width="200" style="border-radius: 2%;" />
-                                </button>
-                                <div class="card_name card-body text-white rgba-black-light p-1">@artist.Name</div>
-                            </div>
-                        }
-                    </div>
-                }
+            <div class="conainer justify-content-between">
+                <div id="recentArtists" class="row justify-content-between" style="margin-right:0px !important; margin-left:0px !important;">
+                    @foreach (var artist in Model.topArtists)
+                    {
+                        <div style="padding-bottom:10px;">
+                            @using (Html.BeginForm("CreateFromCard", "Playlist", FormMethod.Post))
+                            {
+                                <input hidden name="numberOfTracks" class="numTracks" value="30" />
+                                <input hidden name="range" class="range" value="3" />
+                                <input hidden name="isTrack" value="false" />
+                                <input hidden name="inputId" value="@artist.Id" />
+
+                                <div class="card" style=" max-height:202px; max-width:204px; position:relative;">
+                                    <button onclick="$('#page-loading').removeAttr('hidden');" class="card-button" type="submit" style="padding:0;border:none; background-color:#343a40;">
+                                        <img class="img card-img-top" src="@artist.Images[0].Url" height="200" width="200" style="border-radius: 2%;" />
+                                    </button>
+                                    <div class="card_name card-body text-white rgba-black-light p-1">@artist.Name</div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
             </div>
+        }
         </div>
-    </div>
 
 

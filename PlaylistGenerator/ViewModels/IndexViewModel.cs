@@ -23,6 +23,7 @@ namespace PlaylistGenerator.ViewModels
         public Playlist recentTracks { get; set; }
         public List<FullArtist> topArtists { get; set; }
         public Playlist Playlist { get; set; }
+        public List<string> PlaylistURIs { get; set; }
         public FullTrack searchedTrack { get; set; }
         public FullArtist searchedArtist { get; set; }
         public bool isTrack { get; set; }

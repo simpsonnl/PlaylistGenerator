@@ -16,8 +16,9 @@ namespace PlaylistGenerator.Controllers
     {
         private static SpotifyWebAPI _spotify;
         private CredentialsAuth auth = new CredentialsAuth("52c0f5ab6e5f4a2f83da6c5fad1c6bac", "a66d0d708a1f49789372f50a65d2b3cc");
-        
-       
+        private List<string> playlistURIs = new List<string>();
+
+        //returns you to the create playlist view
         public async Task<ActionResult> Create() 
         {
             if ((Playlist)TempData["Playlist"] == null)
@@ -31,8 +32,9 @@ namespace PlaylistGenerator.Controllers
             viewModel.profile = (PrivateProfile)TempData["User"];
             viewModel.api = (SpotifyWebAPI)TempData["Api"];
             viewModel.Playlist = (Playlist)TempData["Playlist"];
+            viewModel.PlaylistURIs = (List<string>)TempData["PlaylistURIs"];
 
-            
+            Console.WriteLine(viewModel.PlaylistURIs);
 
             if (viewModel.profile != null)
             {
@@ -45,6 +47,7 @@ namespace PlaylistGenerator.Controllers
                 }
             }
 
+            TempData["PlaylistURIs"] = (List<string>)TempData["PlaylistURIs"];
             TempData["Api"] = viewModel.api;
             TempData["User"] = viewModel.profile;
             TempData["Token"] = userToken;
@@ -93,6 +96,7 @@ namespace PlaylistGenerator.Controllers
             //if the search item was a track
             //get all the artists from that track 
             //then get all the related artists for those artists
+            //then create the playlsit
             if (isTrack)
             {
 
@@ -113,8 +117,9 @@ namespace PlaylistGenerator.Controllers
 
                 viewModel.Playlist = getPlaylistFromTrack(relatedArtistsLists, numberOfTracks, range, viewModel.searchedTrack.Id);
                 viewModel.trackLengths = (Dictionary<string,string>)TempData["TrackLengths"];
+                
             }
-            //if the search item was an artist, get the related artists
+            //if the search item was an artist, get the related artists, and create a playlist
             else
             {
                 viewModel.searchedArtist = _spotify.GetArtist(artistId);
@@ -126,6 +131,8 @@ namespace PlaylistGenerator.Controllers
                 viewModel.Playlist = getPlaylistFromArtist(relatedArtists, numberOfTracks, range);
                 viewModel.trackLengths = (Dictionary<string, string>)TempData["TrackLengths"];
             }
+
+            TempData["PlaylistURIs"] = (List<string>)TempData["PlaylistURIs"];
 
             TempData["Playlist"] = viewModel.Playlist;
             TempData["Token"] = userToken;
@@ -152,73 +159,10 @@ namespace PlaylistGenerator.Controllers
             return RedirectToAction("CreatePlaylist", new { inputId, isTrack, range, numberOfTracks });
         }
 
-        private string displayArtistsNames(FullTrack searchedTrack)
-        {
-            var displayArtist = "";
-
-            foreach (var artist in searchedTrack.Artists)
-            {
-                displayArtist += artist.Name + ", ";
-            }
-
-            var displayArtistTrimmed = displayArtist.Remove(displayArtist.Length - 2, 2);
-
-            return displayArtist;
-        }
 
         
 
-        private SeveralArtists getRelatedArtistsFromArtist(string id, int scale)
-        {
-            SeveralArtists relatedArtists = new SeveralArtists();
-            relatedArtists = _spotify.GetRelatedArtists(id);
-            SeveralArtists returnedArtists = new SeveralArtists
-            {
-                Artists = new List<FullArtist>
-            {
-                _spotify.GetArtist(id)
-            }
-            };
-            
-            Random rand = new Random();
-            switch (scale)
-            {
-                case 1:
-                    
-                    for (int i = 0; i < 5; i++)
-                    {
-                        returnedArtists.Artists.Add(relatedArtists.Artists[i]);
-                    }
-                    return returnedArtists;
-                case 2:
-                    for (int i = 0; i < (relatedArtists.Artists.Count * .4); i++)
-                    {
-                        returnedArtists.Artists.Add(relatedArtists.Artists[i]);
-                    }
-                    return returnedArtists;
-                case 3:
-                    for (int i = 0; i < (relatedArtists.Artists.Count * (.6)); i++)
-                    {
-                        returnedArtists.Artists.Add(relatedArtists.Artists[i]);
-                    }
-                    return returnedArtists;
-                case 4:
-                    for (int i = 0; i < (relatedArtists.Artists.Count * .8); i++)
-                    {
-                        returnedArtists.Artists.Add(relatedArtists.Artists[i]);
-                    }
-                    return returnedArtists;
-                case 5:
-                    for (int i = 0; i < relatedArtists.Artists.Count; i++)
-                    {
-                        returnedArtists.Artists.Add(relatedArtists.Artists[i]);
-                    }
-                    return returnedArtists;
-                default:
-                    relatedArtists = _spotify.GetRelatedArtists(id);
-                    return null;
-            }
-        }
+        //creates the playlist from the selected artist
         private Playlist getPlaylistFromArtist(SeveralArtists relatedArtists, int size, int range)
         {
             List<string> genres = new List<string>();
@@ -227,6 +171,8 @@ namespace PlaylistGenerator.Controllers
             var rand = new Random();
             Playlist returnedPlaylist = new Playlist();
             FullTrack track = new FullTrack();
+            Dictionary<string, string> trackLengths = new Dictionary<string, string>();
+            List<string> playlistURIs = new List<string>();
 
             SeveralTracks tracks = new SeveralTracks
             {
@@ -253,18 +199,18 @@ namespace PlaylistGenerator.Controllers
 
             int count = 0;
             int iterations = 0;
-            Dictionary<string, string> trackLengths = new Dictionary<string, string>();
+            
+
             if (tracks.Tracks.Count!=0)
             {
                 do
                 {
-                    //tracks = _spotify.GetArtistsTopTracks(relatedArtists.Artists[rand.Next(0, artists)].Id, "US");
-
                     track = tracks.Tracks[iterations];
                     if (track != null && !returnedPlaylist.hasTrack(track.Id))
                     {
                         trackLengths.Add(track.Id, getTrackLengthString(track.DurationMs));
                         returnedPlaylist.TrackList.Add(track);
+                        playlistURIs.Add(track.Uri);
                         count++;
                     }
                     iterations++;
@@ -272,48 +218,35 @@ namespace PlaylistGenerator.Controllers
             }
 
             TempData["TrackLengths"] = trackLengths;
+            TempData["PlaylistURIs"] = playlistURIs;
             return returnedPlaylist;
         }
 
+        //creates a playlist from the selected track 
         private Playlist getPlaylistFromTrack(List<SeveralArtists> relatedArtistsList, int size, int range, string searchTrackId)
         {
             int relatedArtistsCount = 0;
             List<string> genres = new List<string>();
-            AudioFeatures searchTrackfeatures = _spotify.GetAudioFeatures(searchTrackId);
-            float searchTrackEnergy = searchTrackfeatures.Energy;
-            //float searchTrackTempo = searchTrackfeatures.Tempo;
-            //float searchTrackLoudness = searchTrackfeatures.Loudness;
             SeveralArtists reOrderedArtists = new SeveralArtists();
             reOrderedArtists.Artists = new List<FullArtist>();
 
             foreach (var artistList in relatedArtistsList)
             {
                 relatedArtistsCount += artistList.Artists.Count;
-                foreach (var artist in artistList.Artists)
-                {
-                    genres.AddRange(artist.Genres.ToList());
-                }
             }
             
-            int artists = (int)((range / 5.0) * relatedArtistsCount);
+            int artistsAmount = (int)((range / 5.0) * relatedArtistsCount);
+
             //in the case that the song has multiple artists,
             //i don't want the list of related artists to be: related artists from the 1st, then 2nd then 3rd artist etc...
             //i want them to be spread out evenly to give a better playlist based on the songs artists
-            
             for (int i = 0; i < relatedArtistsCount; i++)
             {
                 for (int j = 0; j < relatedArtistsList.Count; j++)
                 {
                     if (i<relatedArtistsList[j].Artists.Count)
                     {
-                        foreach (var genre in relatedArtistsList[j].Artists[i].Genres)
-                        {
-                            if (genres.Contains(genre))
-                            {
-                                reOrderedArtists.Artists.Add(relatedArtistsList[j].Artists[i]);
-                                break;
-                            }
-                        } 
+                        reOrderedArtists.Artists.Add(relatedArtistsList[j].Artists[i]);
                     }
                 }
             }
@@ -327,7 +260,7 @@ namespace PlaylistGenerator.Controllers
                 Tracks = new List<FullTrack>()
             };
             
-            for (int i = 0; i < reOrderedArtists.Artists.Count; i++)
+            for (int i = 0; i < artistsAmount; i++)
             {
                 tracks.Tracks.AddRange(_spotify.GetArtistsTopTracks(reOrderedArtists.Artists[i].Id, "US").Tracks);
             }
@@ -349,35 +282,26 @@ namespace PlaylistGenerator.Controllers
             {
                 do
                 {
-                    //tracks = _spotify.GetArtistsTopTracks(relatedArtists.Artists[rand.Next(0, artists)].Id, "US");
-
                     track = tracks.Tracks[iterations];
 
                     if (track != null && !returnedPlaylist.hasTrack(track.Id))
                     {
-                        AudioFeatures features = _spotify.GetAudioFeatures(track.Id);
-                        float energy = features.Energy;
-                        float tempo = features.Tempo;
-                        //float danceability = features.Danceability;
-                        //float loudness = features.Loudness;
-                        if (energy >= (searchTrackEnergy - .15) && energy <= (searchTrackEnergy + .15)/* && tempo >= (searchTrackTempo - 10) && tempo <= (searchTrackTempo + 10)*/)
-
-                        {
                             trackLengths.Add(track.Id, getTrackLengthString(track.DurationMs));
                             returnedPlaylist.TrackList.Add(track);
+                            playlistURIs.Add(track.Uri);
                             count++;
-                        }
-
                     }
 
                     iterations++;
                 } while (count < size && iterations < tracks.Tracks.Count);
             }
 
+            TempData["PlaylistURIs"] = playlistURIs;
             TempData["TrackLengths"] = trackLengths;
             return returnedPlaylist;
         }
-
+        
+        //saves the playlist to th users account and sends you back to the home page
         public async Task<ActionResult> Save(string playlistName, bool isPublic=false) {
             string name = playlistName;
             if (name == "")
@@ -389,7 +313,8 @@ namespace PlaylistGenerator.Controllers
             AuthorizationCodeAuth auth = (AuthorizationCodeAuth)TempData["Auth"];
             SpotifyWebAPI api = (SpotifyWebAPI)TempData["Api"];
             Playlist currentPlaylist = (Playlist)TempData["Playlist"];
-
+            IndexViewModel viewModel = (IndexViewModel)TempData["ViewModel"];
+            viewModel.PlaylistURIs = (List<string>)TempData["PlaylistURIs"];
             if (token.IsExpired())
             {
 
@@ -402,26 +327,41 @@ namespace PlaylistGenerator.Controllers
 
             FullPlaylist playlist = api.CreatePlaylist(userId, name, isPublic);
 
-            if (!playlist.HasError())
-                Console.WriteLine("Playlist-URI: " + playlist.Uri);
-
             ErrorResponse response = new ErrorResponse();
 
-            foreach (var track in currentPlaylist.TrackList)
-            {
-                response = api.AddPlaylistTrack(playlist.Id,track.Uri);
-            }
+            response = api.AddPlaylistTracks(playlist.Id, viewModel.PlaylistURIs);
+            
             TempData["FlashMessage"] = name + " was successfully created and saved to your Spotify account!";
+            TempData["isError"] = false;
 
-
-            if (!response.HasError())
+            //checks for error from laylist save and changes the flass message appropriately.
+            if (response.HasError())
             {
-                
+                TempData["FlashMessage"] = "Something went wrong while saving the playlist.";
+                TempData["isError"] = true;
             }
+
+
             
             return RedirectToAction("Index", "Home");
         }
 
+        //adds all the artists to be shown in the search bar
+        private string displayArtistsNames(FullTrack searchedTrack)
+        {
+            var displayArtist = "";
+
+            foreach (var artist in searchedTrack.Artists)
+            {
+                displayArtist += artist.Name + ", ";
+            }
+
+            var displayArtistTrimmed = displayArtist.Remove(displayArtist.Length - 2, 2);
+
+            return displayArtist;
+        }
+
+        //converts the track length from ms to M:SS
         private string getTrackLengthString(int ms) 
         {
             
