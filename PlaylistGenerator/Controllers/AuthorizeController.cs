@@ -21,15 +21,15 @@ namespace PlaylistGenerator.Controllers
     {
         private string _clientId = "52c0f5ab6e5f4a2f83da6c5fad1c6bac";
         private string _secretId = "a66d0d708a1f49789372f50a65d2b3cc";
-        private string _redirectURL = "https://localhost:44385/Authorize/Callback/";
-        private string _redirectURLFromCreate = "https://localhost:44385/Authorize/CallbackFromCreate/";
-        private string _serverURI = "https://localhost:44385/";
+        //private string _redirectURL = "https://localhost:44385/Authorize/Callback/";
+        //private string _redirectURLFromCreate = "https://localhost:44385/Authorize/CallbackFromCreate/";
+        //private string _serverURI = "https://localhost:44385/";
         //private string _redirectURL = "https://spotifyplaylistgenerator.azurewebsites.net/Authorize/Callback/";
         //private string _redirectURLFromCreate = "https://spotifyplaylistgenerator.azurewebsites.net/Authorize/CallbackFromCreate/";
         //private string _serverURI = "https://spotifyplaylistgenerator.azurewebsites.net/";
-        //private string _redirectURL = "https://playlistgenerator.net/Authorize/Callback/";
-        //private string _redirectURLFromCreate = "https://playlistgenerator.net/Authorize/CallbackFromCreate/";
-        //private string _serverURI = "https://playlistgenerator.net/";
+        private string _redirectURL = "https://playlistgenerator.net/Authorize/Callback/";
+        private string _redirectURLFromCreate = "https://playlistgenerator.net/Authorize/CallbackFromCreate/";
+        private string _serverURI = "https://playlistgenerator.net/";
         private string _authorizeRedirect = "https://accounts.spotify.com/authorize?response_type=code&redirect_uri=";
 
         //callback method used if login from "/"
